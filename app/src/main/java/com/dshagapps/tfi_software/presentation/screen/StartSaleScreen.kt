@@ -66,9 +66,7 @@ fun StartSaleScreen(
                 viewModel.onFilterChange(it)
             },
             maxLines = 1,
-            label = {
-                Text("Buscar")
-            }
+            label = { Text("Buscar") }
         )
 
         LazyColumn(
@@ -103,34 +101,27 @@ private fun StockCard(
         modifier = modifier,
         onClick = onClick
     ){
-        Column (modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)) {
+        Column (
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
             StyledText(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp),
                 title = "Prenda:",
                 description = stock.productDescription
             )
             StyledText(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 2.dp),
                 title = "Color:",
                 description = stock.colorDescription
             )
 
             StyledText(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 2.dp),
                 title = "Talle:",
                 description = stock.sizeDescription
             )
 
             StyledText(
-                modifier = Modifier.fillMaxWidth(),
                 title = "Precio:",
                 description = "$${DecimalFormat("#.00").format(stock.price)}"
             )
@@ -155,7 +146,7 @@ private fun StyledText(
     }
 
     Text(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         text = combinedText
     )
 }
