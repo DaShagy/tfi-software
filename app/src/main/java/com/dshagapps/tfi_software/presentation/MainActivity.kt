@@ -11,7 +11,7 @@ import com.dshagapps.tfi_software.data.service.ServiceProvider
 import com.dshagapps.tfi_software.data.service.api.Api
 import com.dshagapps.tfi_software.domain.repositories.SaleRepository
 import com.dshagapps.tfi_software.presentation.navigation.Navigation
-import com.dshagapps.tfi_software.presentation.ui.TfisoftwareTheme
+import com.dshagapps.tfi_software.presentation.ui.theme.TfisoftwareTheme
 import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 
 class MainActivity : BaseActivity() {
@@ -34,7 +34,12 @@ class MainActivity : BaseActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Navigation(viewModel = viewModel)
+                    Navigation(
+                        viewModel = viewModel,
+                        onBack = {
+                            finish()
+                        }
+                    )
                 }
             }
         }

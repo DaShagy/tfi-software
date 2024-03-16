@@ -1,4 +1,4 @@
-package com.dshagapps.tfi_software.presentation.ui
+package com.dshagapps.tfi_software.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

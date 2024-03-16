@@ -1,4 +1,4 @@
-package com.dshagapps.tfi_software.presentation.ui
+package com.dshagapps.tfi_software.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build

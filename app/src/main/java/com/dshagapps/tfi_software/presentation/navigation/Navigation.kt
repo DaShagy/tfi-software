@@ -14,7 +14,8 @@ import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 @Composable
 fun Navigation(
     navController: NavHostController = rememberNavController(),
-    viewModel: SaleViewModel
+    viewModel: SaleViewModel,
+    onBack: () -> Unit
 ) {
     NavHost(navController = navController, startDestination = "mainScreen") {
         composable("mainScreen") {
@@ -23,7 +24,7 @@ fun Navigation(
                     navController.navigate("startSaleScreen/$branchId")
                 },
                 onBack = {
-                    navController.popBackStack()
+                    if (!navController.popBackStack()) onBack()
                 }
             )
         }
