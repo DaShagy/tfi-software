@@ -7,14 +7,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.dshagapps.tfi_software.data.service.api.Api
 import com.dshagapps.tfi_software.presentation.screen.MainScreen
 import com.dshagapps.tfi_software.presentation.screen.StartSaleScreen
+import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 
 @Composable
 fun Navigation(
     navController: NavHostController = rememberNavController(),
-    api: Api
+    viewModel: SaleViewModel
 ) {
     NavHost(navController = navController, startDestination = "mainScreen") {
         composable("mainScreen") {
@@ -36,7 +36,7 @@ fun Navigation(
                 onBack = {
                     navController.popBackStack()
                 },
-                api = api
+                viewModel = viewModel
             )
         }
     }

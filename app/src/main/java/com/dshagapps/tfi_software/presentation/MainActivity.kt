@@ -1,25 +1,31 @@
 package com.dshagapps.tfi_software.presentation
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.dshagapps.tfi_software.data.repositories.SaleRepositoryImpl
 import com.dshagapps.tfi_software.data.service.ServiceProvider
 import com.dshagapps.tfi_software.data.service.api.Api
+import com.dshagapps.tfi_software.domain.repositories.SaleRepository
 import com.dshagapps.tfi_software.presentation.navigation.Navigation
 import com.dshagapps.tfi_software.presentation.ui.TfisoftwareTheme
+import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 
-class MainActivity : ComponentActivity() {
+class MainActivity : BaseActivity() {
 
-    private lateinit var api: Api
+    private lateinit var repository: SaleRepository
+
+    private val viewModel: SaleViewModel by viewModel {
+        SaleViewModel(repository)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        api = ServiceProvider(applicationContext).createService(Api::class.java)
+        repository = SaleRepositoryImpl(ServiceProvider(applicationContext).createService(Api::class.java))
 
         setContent {
             TfisoftwareTheme {
@@ -28,7 +34,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Navigation(api = api)
+                    Navigation(viewModel = viewModel)
                 }
             }
         }

@@ -5,5 +5,9 @@ data class StockResponse(
     var cantidad: Int,
     var color: String,
     var talle: String,
-    var articulo: String
+    var articulo: String,
+    var colorId: Int,
+    var articuloId: Int,
+    var talleId: Int,
+    var precio: String
 )

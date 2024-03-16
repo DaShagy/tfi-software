@@ -10,33 +10,29 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.dshagapps.tfi_software.data.service.api.Api
-import com.dshagapps.tfi_software.data.service.response.StockResponse
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 
 @Composable
 fun StartSaleScreen(
     modifier: Modifier = Modifier,
     branchId: Int = 1,
     onBack: () -> Unit,
-    api: Api
+    viewModel: SaleViewModel
 ) {
 
     BackHandler(onBack = onBack)
 
-    var list by remember { mutableStateOf<List<StockResponse>>(emptyList()) }
+    val stockList = viewModel.stockList.collectAsState()
 
     LazyColumn(
-        modifier = modifier.fillMaxWidth().padding(8.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp)
     ) {
-        this.items(list) {
+        this.items(stockList.value) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -44,19 +40,15 @@ fun StartSaleScreen(
                 horizontalArrangement = Arrangement.Absolute.SpaceBetween
             ) {
                 Text(text = "${it.id}")
-                Text(text = it.articulo)
-                Text(text = it.color)
-                Text(text = it.talle)
-                Text(text = "Cantidad: ${it.cantidad}")
+                Text(text = it.productDescription)
+                Text(text = it.colorDescription)
+                Text(text = it.sizeDescription)
+                Text(text = "Cantidad: ${it.quantity}")
             }
         }
     }
 
     LaunchedEffect(Unit) {
-        this.launch(Dispatchers.IO) {
-            api.getStock(branchId).execute().also {
-                list = it.body()?.content?.toList() ?: emptyList()
-            }
-        }
+        viewModel.getStockByBranch(branchId)
     }
 }
