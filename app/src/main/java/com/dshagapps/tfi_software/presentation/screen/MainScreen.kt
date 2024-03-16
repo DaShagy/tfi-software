@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    onStartSale: () -> Unit,
+    onStartSale: (Int) -> Unit,
     onBack: () -> Unit
 ) {
 
@@ -50,7 +50,9 @@ fun MainScreen(
 
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = onStartSale
+                onClick = {
+                    onStartSale(branchId.toIntOrNull() ?: 1)
+                }
             ) {
                 Text(text = "Iniciar venta")
             }
