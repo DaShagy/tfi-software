@@ -48,7 +48,7 @@ fun StartSaleScreen(
 
     var search by remember { mutableStateOf("") }
 
-    val stockList = viewModel.stockList.collectAsState()
+    val stockList = viewModel.filteredStockList.collectAsState()
 
     Column(
         modifier = modifier
@@ -61,8 +61,14 @@ fun StartSaleScreen(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = search,
-            onValueChange = { search = it },
-            maxLines = 1
+            onValueChange = {
+                search = it
+                viewModel.onFilterChange(it)
+            },
+            maxLines = 1,
+            label = {
+                Text("Buscar")
+            }
         )
 
         LazyColumn(
@@ -86,13 +92,16 @@ fun StartSaleScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StockCard(
     modifier: Modifier = Modifier,
-    stock: Stock
+    stock: Stock,
+    onClick: () -> Unit = {}
 ) {
     Card(
-        modifier = modifier
+        modifier = modifier,
+        onClick = onClick
     ){
         Column (modifier = Modifier
             .fillMaxSize()
