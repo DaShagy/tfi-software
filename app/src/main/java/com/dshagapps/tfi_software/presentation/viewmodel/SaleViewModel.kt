@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.dshagapps.tfi_software.domain.entities.Client
 import com.dshagapps.tfi_software.domain.entities.Stock
 import com.dshagapps.tfi_software.domain.repositories.SaleRepository
+import com.dshagapps.tfi_software.domain.rules.AnonymousClientRules
 import com.dshagapps.tfi_software.presentation.models.ClientUiModel
 import com.dshagapps.tfi_software.presentation.models.SaleLineUiModel
 import com.dshagapps.tfi_software.presentation.models.StockUiModel
 import com.dshagapps.tfi_software.presentation.utils.decrementStockQuantity
+import com.dshagapps.tfi_software.presentation.utils.getTotal
 import com.dshagapps.tfi_software.presentation.utils.incrementStockQuantity
 import com.dshagapps.tfi_software.presentation.utils.toUiModel
 import kotlinx.coroutines.Dispatchers
@@ -83,6 +85,10 @@ class SaleViewModel(
             saleLines.value = updatedSaleLines.filterNot { line -> line.stock.quantity == 0 }
         }
     }
+
+    val isNominalClient: Boolean
+        get() = AnonymousClientRules.isNominalClient(saleLines.value.getTotal())
+
 
     fun removeSaleLineById(lineId: Int) {
         saleLines.value = saleLines.value.filterNot { line -> line.id == lineId }
