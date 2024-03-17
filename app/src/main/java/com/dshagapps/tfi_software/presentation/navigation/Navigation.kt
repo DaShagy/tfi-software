@@ -61,9 +61,12 @@ fun Navigation(
         }
 
         composable("clientDetailScreen") {
-            ClientDetailScreen {
-                navController.popBackStack()
-            }
+            ClientDetailScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                viewModel = viewModel
+            )
         }
     }
 }
