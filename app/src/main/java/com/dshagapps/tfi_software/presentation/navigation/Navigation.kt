@@ -38,6 +38,7 @@ fun Navigation(
                 branchId = it.arguments?.getInt("branchId") ?: 1,
                 onBack = {
                     navController.popBackStack()
+                    viewModel.cleanStates()
                 },
                 onContinue = {
                     navController.navigate("saleLinesDetailScreen")

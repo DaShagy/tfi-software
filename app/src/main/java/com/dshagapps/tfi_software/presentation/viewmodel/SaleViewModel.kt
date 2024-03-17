@@ -21,10 +21,9 @@ class SaleViewModel(
     private val repository: SaleRepository
 ) : ViewModel() {
 
-    private var stockList: MutableStateFlow<List<Stock>> = MutableStateFlow(emptyList())
+    private val stockList: MutableStateFlow<List<Stock>> = MutableStateFlow(emptyList())
 
-    var filteredStockList: MutableStateFlow<List<StockUiModel>> = MutableStateFlow(emptyList())
-        private set
+    val filteredStockList: MutableStateFlow<List<StockUiModel>> = MutableStateFlow(emptyList())
 
     private val filteredTextFlow: MutableStateFlow<String> = MutableStateFlow("")
 
@@ -107,9 +106,20 @@ class SaleViewModel(
         updateFilteredStockList()
     }
 
+    fun removeSaleLineById(lineId: Int) {
+        saleLines.value = saleLines.value.filterNot { line -> line.id == lineId }
+        updateFilteredStockList()
+    }
+
     private fun updateFilteredStockList() {
         filteredStockList.value = filteredStockList.value.map {  stock ->
             saleLines.value.find { line -> line.stock.id == stock.id }?.stock ?: stock.copy(quantity = 0)
         }
+    }
+
+    fun cleanStates() {
+        stockList.value = emptyList()
+        filteredStockList.value = emptyList()
+        saleLines.value = emptyList()
     }
 }
