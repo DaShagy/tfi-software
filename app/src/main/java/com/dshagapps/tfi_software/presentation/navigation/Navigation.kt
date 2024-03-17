@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.dshagapps.tfi_software.presentation.screen.MainScreen
+import com.dshagapps.tfi_software.presentation.screen.SaleLinesDetailScreen
 import com.dshagapps.tfi_software.presentation.screen.StartSaleScreen
 import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 
@@ -28,6 +29,7 @@ fun Navigation(
                 }
             )
         }
+
         composable(
             route = "startSaleScreen/{branchId}",
             arguments = listOf(navArgument("branchId") { type = NavType.IntType })
@@ -37,8 +39,17 @@ fun Navigation(
                 onBack = {
                     navController.popBackStack()
                 },
+                onContinue = {
+                    navController.navigate("saleLinesDetailScreen")
+                },
                 viewModel = viewModel
             )
+        }
+
+        composable("saleLinesDetailScreen") {
+            SaleLinesDetailScreen {
+                navController.popBackStack()
+            }
         }
     }
 }

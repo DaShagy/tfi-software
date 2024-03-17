@@ -38,6 +38,7 @@ fun StartSaleScreen(
     modifier: Modifier = Modifier,
     branchId: Int = 1,
     onBack: () -> Unit,
+    onContinue: () -> Unit,
     viewModel: SaleViewModel
 ) {
 
@@ -68,8 +69,8 @@ fun StartSaleScreen(
 
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 8.dp)
+                .weight(1.0f)
+                .padding(vertical = 8.dp)
         ) {
             this.items(stockList.value) { stock ->
                 StockCard(
@@ -85,6 +86,13 @@ fun StartSaleScreen(
                     }
                 )
             }
+        }
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onContinue
+        ) {
+            Text("Siguiente")
         }
     }
 
