@@ -47,9 +47,12 @@ fun Navigation(
         }
 
         composable("saleLinesDetailScreen") {
-            SaleLinesDetailScreen {
-                navController.popBackStack()
-            }
+            SaleLinesDetailScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                viewModel = viewModel
+            )
         }
     }
 }

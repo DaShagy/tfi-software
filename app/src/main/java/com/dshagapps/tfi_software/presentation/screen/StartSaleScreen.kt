@@ -29,8 +29,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.dshagapps.tfi_software.presentation.models.StockUiModel
+import com.dshagapps.tfi_software.presentation.ui.components.ScreenBottomButtons
+import com.dshagapps.tfi_software.presentation.utils.toPriceString
 import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
-import java.text.DecimalFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,13 +91,12 @@ fun StartSaleScreen(
             }
         }
 
-        Button(
+        ScreenBottomButtons(
             modifier = Modifier.fillMaxWidth(),
-            onClick = onContinue,
-            enabled = saleLines.value.isNotEmpty()
-        ) {
-            Text("Siguiente")
-        }
+            onPrimaryButton = onContinue,
+            onSecondaryButton = onBack,
+            primaryButtonEnabled = saleLines.value.isNotEmpty()
+        )
     }
 
     LaunchedEffect(Unit) {
@@ -136,7 +136,7 @@ private fun StockCard(
 
             StyledText(
                 title = "Precio:",
-                description = "$${DecimalFormat("#.00").format(stock.price)}"
+                description = stock.price.toPriceString()
             )
 
             StyledText(
@@ -150,13 +150,15 @@ private fun StockCard(
             ) {
                 Button(
                     modifier = Modifier.weight(1f),
-                    onClick = onAddProduct
+                    onClick = onAddProduct,
+                    enabled = stock.quantity < stock.maxQuantity
                 ) {
                     Text(text = "Agregar a la venta")
                 }
                 Button(
                     modifier = Modifier.weight(1f),
-                    onClick = onRemoveProduct
+                    onClick = onRemoveProduct,
+                    enabled = stock.quantity > 0
                 ) {
                     Text(text = "Quitar de la venta" )
                 }
