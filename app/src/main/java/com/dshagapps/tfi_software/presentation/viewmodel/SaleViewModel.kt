@@ -2,6 +2,7 @@ package com.dshagapps.tfi_software.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dshagapps.tfi_software.domain.entities.Client
 import com.dshagapps.tfi_software.domain.entities.Stock
 import com.dshagapps.tfi_software.domain.repositories.SaleRepository
 import com.dshagapps.tfi_software.presentation.models.SaleLineUiModel
@@ -28,6 +29,8 @@ class SaleViewModel(
     private val filteredTextFlow: MutableStateFlow<String> = MutableStateFlow("")
 
     val saleLines: MutableStateFlow<List<SaleLineUiModel>> = MutableStateFlow(emptyList())
+
+    val client: MutableStateFlow<Client> = MutableStateFlow(Client())
 
     init {
         combine(stockList, filteredTextFlow) { stocks, filterText ->
@@ -63,6 +66,15 @@ class SaleViewModel(
             onFailure = {
                 stockList.value = emptyList()
             }
+        )
+    }
+
+    fun getClientByCuit(cuit: String, onFailureCallback: (Throwable) -> Unit) = viewModelScope.launch(Dispatchers.IO) {
+        repository.getClientByCuit(cuit).fold(
+            onSuccess = {
+                client.value = it
+            },
+            onFailure = onFailureCallback
         )
     }
 

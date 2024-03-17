@@ -20,15 +20,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.dshagapps.tfi_software.domain.entities.Client
 import com.dshagapps.tfi_software.presentation.ui.components.ScreenBottomButtons
 import com.dshagapps.tfi_software.presentation.utils.getTotal
 import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,14 +43,16 @@ fun ClientDetailScreen(
     BackHandler(onBack = onBack)
 
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
-    val saleLines = viewModel.saleLines.collectAsState()
+    val client = viewModel.client.collectAsState()
 
-    val isFinalConsumerEnabled = saleLines.value.getTotal() < 1000
+    val isFinalConsumerEnabled = viewModel.saleLines.collectAsState().value.getTotal() < 1000
 
     var isAnonymousClient by remember { mutableStateOf(isFinalConsumerEnabled) }
 
     var cuit by remember { mutableStateOf("") }
+
 
     Column(
         modifier = modifier
@@ -87,8 +92,31 @@ fun ClientDetailScreen(
                     maxLines = 1
                 )
 
-                Button(onClick = { Toast.makeText(context, cuit, Toast.LENGTH_SHORT).show() }) {
+                Button(
+                    onClick = {
+                        viewModel.getClientByCuit(cuit) {
+                            coroutineScope.launch {
+                                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                ) {
                     Text("Buscar CUIT")
+                }
+            }
+
+            if (client.value.firstName.isNotEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(text = "Nombre: ${client.value.firstName}")
+                    Text(text = "Apellido: ${client.value.lastName}")
+                    Text(text = "Domicilio: ${client.value.address}")
+                    Text(text = "CUIT: ${client.value.cuit}")
+                    Text(text = "Condición Tributaria: ${client.value.tributeCondition}")
                 }
             }
         }
@@ -98,7 +126,7 @@ fun ClientDetailScreen(
         ScreenBottomButtons(
             onPrimaryButton = onBack,
             onSecondaryButton = onBack,
-            primaryButtonEnabled = false
+            primaryButtonEnabled = isAnonymousClient || client.value != Client()
         )
     }
 }
