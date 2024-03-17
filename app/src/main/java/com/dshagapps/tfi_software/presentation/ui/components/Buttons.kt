@@ -22,6 +22,14 @@ internal fun ScreenBottomButtons(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onPrimaryButton,
+            enabled = primaryButtonEnabled
+        ) {
+            Text("Siguiente")
+        }
+
         onSecondaryButton?.let { onClick ->
             Button(
                 modifier = Modifier.fillMaxWidth(),
@@ -34,13 +42,6 @@ internal fun ScreenBottomButtons(
             ) {
                 Text("Atras")
             }
-        }
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = onPrimaryButton,
-            enabled = primaryButtonEnabled
-        ) {
-            Text("Siguiente")
         }
     }
 }

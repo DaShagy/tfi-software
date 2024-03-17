@@ -34,6 +34,7 @@ import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 fun SaleLinesDetailScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
+    onContinue: () -> Unit,
     viewModel: SaleViewModel
 ) {
     BackHandler(onBack = onBack)
@@ -79,7 +80,7 @@ fun SaleLinesDetailScreen(
 
         ScreenBottomButtons(
             modifier = Modifier.fillMaxWidth(),
-            onPrimaryButton = {},
+            onPrimaryButton = onContinue,
             onSecondaryButton = onBack
         )
     }

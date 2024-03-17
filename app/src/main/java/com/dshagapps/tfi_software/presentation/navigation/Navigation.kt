@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.dshagapps.tfi_software.presentation.screen.ClientDetailScreen
 import com.dshagapps.tfi_software.presentation.screen.MainScreen
 import com.dshagapps.tfi_software.presentation.screen.SaleLinesDetailScreen
 import com.dshagapps.tfi_software.presentation.screen.StartSaleScreen
@@ -52,8 +53,17 @@ fun Navigation(
                 onBack = {
                     navController.popBackStack()
                 },
+                onContinue = {
+                    navController.navigate("clientDetailScreen")
+                },
                 viewModel = viewModel
             )
+        }
+
+        composable("clientDetailScreen") {
+            ClientDetailScreen {
+                navController.popBackStack()
+            }
         }
     }
 }
