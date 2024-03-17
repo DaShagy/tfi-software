@@ -2,6 +2,7 @@ package com.dshagapps.tfi_software.presentation.models
 
 data class StockUiModel(
     val id: Int,
+    val productId: Int,
     val productDescription: String,
     val sizeDescription: String,
     val colorDescription: String,

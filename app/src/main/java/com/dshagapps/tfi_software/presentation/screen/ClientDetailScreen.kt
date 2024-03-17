@@ -28,9 +28,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.dshagapps.tfi_software.domain.entities.Client
+import com.dshagapps.tfi_software.presentation.models.ClientUiModel
 import com.dshagapps.tfi_software.presentation.ui.components.ScreenBottomButtons
 import com.dshagapps.tfi_software.presentation.utils.getTotal
 import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,7 +47,7 @@ fun ClientDetailScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    val client = viewModel.client.collectAsState()
+    var client by remember { mutableStateOf(ClientUiModel()) }
 
     val isFinalConsumerEnabled = viewModel.saleLines.collectAsState().value.getTotal() < 1000
 
@@ -94,10 +96,12 @@ fun ClientDetailScreen(
 
                 Button(
                     onClick = {
-                        viewModel.getClientByCuit(cuit) {
-                            coroutineScope.launch {
-                                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
-                            }
+                        coroutineScope.launch {
+                            viewModel.getClientByCuit(cuit) {
+                                this.launch {
+                                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                                }
+                            }.collect { client = it }
                         }
                     }
                 ) {
@@ -105,18 +109,18 @@ fun ClientDetailScreen(
                 }
             }
 
-            if (client.value.firstName.isNotEmpty()) {
+            if (client.firstName.isNotEmpty()) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(4.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    Text(text = "Nombre: ${client.value.firstName}")
-                    Text(text = "Apellido: ${client.value.lastName}")
-                    Text(text = "Domicilio: ${client.value.address}")
-                    Text(text = "CUIT: ${client.value.cuit}")
-                    Text(text = "Condición Tributaria: ${client.value.tributeCondition}")
+                    Text(text = "Nombre: ${client.firstName}")
+                    Text(text = "Apellido: ${client.lastName}")
+                    Text(text = "Domicilio: ${client.address}")
+                    Text(text = "CUIT: ${client.cuit}")
+                    Text(text = "Condición Tributaria: ${client.tributeCondition}")
                 }
             }
         }
@@ -126,7 +130,7 @@ fun ClientDetailScreen(
         ScreenBottomButtons(
             onPrimaryButton = onBack,
             onSecondaryButton = onBack,
-            primaryButtonEnabled = isAnonymousClient || client.value != Client()
+            primaryButtonEnabled = isAnonymousClient || client != ClientUiModel()
         )
     }
 }

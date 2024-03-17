@@ -5,15 +5,19 @@ import androidx.lifecycle.viewModelScope
 import com.dshagapps.tfi_software.domain.entities.Client
 import com.dshagapps.tfi_software.domain.entities.Stock
 import com.dshagapps.tfi_software.domain.repositories.SaleRepository
+import com.dshagapps.tfi_software.presentation.models.ClientUiModel
 import com.dshagapps.tfi_software.presentation.models.SaleLineUiModel
 import com.dshagapps.tfi_software.presentation.models.StockUiModel
 import com.dshagapps.tfi_software.presentation.utils.decrementStockQuantity
 import com.dshagapps.tfi_software.presentation.utils.incrementStockQuantity
 import com.dshagapps.tfi_software.presentation.utils.toUiModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -22,61 +26,27 @@ class SaleViewModel(
     private val repository: SaleRepository
 ) : ViewModel() {
 
-    private val stockList: MutableStateFlow<List<Stock>> = MutableStateFlow(emptyList())
-
-    val filteredStockList: MutableStateFlow<List<StockUiModel>> = MutableStateFlow(emptyList())
-
-    private val filteredTextFlow: MutableStateFlow<String> = MutableStateFlow("")
-
     val saleLines: MutableStateFlow<List<SaleLineUiModel>> = MutableStateFlow(emptyList())
 
-    val client: MutableStateFlow<Client> = MutableStateFlow(Client())
-
-    init {
-        combine(stockList, filteredTextFlow) { stocks, filterText ->
-            val keywords = filterText.split(" ")
-            stocks.filter { stock ->
-                keywords.any { keyword ->
-                    stock.productDescription.contains(keyword, ignoreCase = true)
-                            || stock.colorDescription.contains(keyword, ignoreCase = true)
-                            || stock.sizeDescription.contains(keyword, ignoreCase = true)
-                            || keyword.toIntOrNull()?.equals(stock.productId) == true
-                }
-            }
-        }
-            .distinctUntilChanged()
-            .onEach { filteredStocks ->
-                filteredStockList.value = filteredStocks.map { stock -> stock.toUiModel() }
-                updateFilteredStockList()
-            }
-            .launchIn(viewModelScope)
-    }
-
-    fun onFilterChange(filterText: String) {
-        viewModelScope.launch {
-            filteredTextFlow.value = filterText
-        }
-    }
-
-    fun getStockByBranch(branchId: Int) = viewModelScope.launch(Dispatchers.IO) {
+    fun getStockByBranch(branchId: Int): Flow<List<StockUiModel>> = flow<List<StockUiModel>> {
         repository.getStockByBranchId(branchId).fold(
-            onSuccess = {
-                stockList.value = it
+            onSuccess = { stockList ->
+                emit(stockList.map { stock -> stock.toUiModel() })
             },
             onFailure = {
-                stockList.value = emptyList()
+                emit(emptyList())
             }
         )
-    }
+    }.flowOn(Dispatchers.IO)
 
-    fun getClientByCuit(cuit: String, onFailureCallback: (Throwable) -> Unit) = viewModelScope.launch(Dispatchers.IO) {
+    fun getClientByCuit(cuit: String, onFailureCallback: (Throwable) -> Unit): Flow<ClientUiModel> = flow {
         repository.getClientByCuit(cuit).fold(
-            onSuccess = {
-                client.value = it
+            onSuccess = { client ->
+                emit(client.toUiModel())
             },
             onFailure = onFailureCallback
         )
-    }
+    }.flowOn(Dispatchers.IO)
 
     fun addProductToSale(stock: StockUiModel) {
         val existingSaleLine = saleLines.value.find { line -> line.stock.id == stock.id }
@@ -97,8 +67,6 @@ class SaleViewModel(
             }
             saleLines.value = updatedSaleLines
         }
-
-        updateFilteredStockList()
     }
 
     fun removeProductFromSale(stock: StockUiModel) {
@@ -114,24 +82,13 @@ class SaleViewModel(
             }
             saleLines.value = updatedSaleLines.filterNot { line -> line.stock.quantity == 0 }
         }
-
-        updateFilteredStockList()
     }
 
     fun removeSaleLineById(lineId: Int) {
         saleLines.value = saleLines.value.filterNot { line -> line.id == lineId }
-        updateFilteredStockList()
-    }
-
-    private fun updateFilteredStockList() {
-        filteredStockList.value = filteredStockList.value.map {  stock ->
-            saleLines.value.find { line -> line.stock.id == stock.id }?.stock ?: stock.copy(quantity = 0)
-        }
     }
 
     fun cleanStates() {
-        stockList.value = emptyList()
-        filteredStockList.value = emptyList()
         saleLines.value = emptyList()
     }
 }

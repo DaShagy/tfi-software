@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,14 +43,29 @@ fun StartSaleScreen(
     onContinue: () -> Unit,
     viewModel: SaleViewModel
 ) {
-
     BackHandler(onBack = onBack)
+
+    val saleLines = viewModel.saleLines.collectAsState()
 
     var search by remember { mutableStateOf("") }
 
-    val stockList = viewModel.filteredStockList.collectAsState()
+    var stockList: List<StockUiModel> by remember { mutableStateOf(emptyList()) }
 
-    val saleLines = viewModel.saleLines.collectAsState()
+    val filteredStockList: List<StockUiModel> by remember {
+        derivedStateOf {
+            stockList.filter { stock ->
+                search.split(" ").any {
+                    keyword ->
+                        stock.productDescription.contains(keyword, ignoreCase = true)
+                        || stock.colorDescription.contains(keyword, ignoreCase = true)
+                        || stock.sizeDescription.contains(keyword, ignoreCase = true)
+                        || keyword.toIntOrNull()?.equals(stock.productId) == true
+                }
+            }.map { stock ->
+                saleLines.value.find { line -> line.stock.id == stock.id }?.stock ?: stock.copy(quantity = 0)
+            }
+        }
+    }
 
     Column(
         modifier = modifier
@@ -62,10 +78,7 @@ fun StartSaleScreen(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = search,
-            onValueChange = {
-                search = it
-                viewModel.onFilterChange(it)
-            },
+            onValueChange = { search = it },
             maxLines = 1,
             label = { Text("Buscar") }
         )
@@ -75,7 +88,7 @@ fun StartSaleScreen(
                 .weight(1.0f)
                 .padding(vertical = 8.dp)
         ) {
-            this.items(stockList.value) { stock ->
+            this.items(filteredStockList) { stock ->
                 StockCard(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -100,7 +113,9 @@ fun StartSaleScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.getStockByBranch(branchId)
+        viewModel.getStockByBranch(branchId).collect { stock ->
+            stockList = stock
+        }
     }
 }
 

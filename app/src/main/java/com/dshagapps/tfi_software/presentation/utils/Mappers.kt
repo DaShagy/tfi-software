@@ -8,6 +8,7 @@ import com.dshagapps.tfi_software.presentation.models.StockUiModel
 fun Stock.toUiModel(): StockUiModel =
     StockUiModel(
         id = id,
+        productId = productId,
         productDescription = productDescription,
         sizeDescription = sizeDescription,
         colorDescription = colorDescription,
@@ -20,6 +21,6 @@ fun Client.toUiModel(): ClientUiModel =
         firstName,
         lastName,
         address,
-        cuit.toString(),
+        cuit,
         tributeCondition
     )
