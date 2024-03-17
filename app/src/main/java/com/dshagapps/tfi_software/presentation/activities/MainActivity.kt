@@ -1,4 +1,4 @@
-package com.dshagapps.tfi_software.presentation
+package com.dshagapps.tfi_software.presentation.activities
 
 import android.os.Bundle
 import androidx.activity.compose.setContent

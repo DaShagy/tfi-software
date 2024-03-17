@@ -1,7 +1,7 @@
 package com.dshagapps.tfi_software.data.repositories
 
 import com.dshagapps.tfi_software.data.service.api.Api
-import com.dshagapps.tfi_software.data.toStock
+import com.dshagapps.tfi_software.data.utils.toStock
 import com.dshagapps.tfi_software.domain.entities.Stock
 import com.dshagapps.tfi_software.domain.repositories.SaleRepository
 

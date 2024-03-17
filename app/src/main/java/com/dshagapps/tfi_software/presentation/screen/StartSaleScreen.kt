@@ -1,6 +1,5 @@
 package com.dshagapps.tfi_software.presentation.screen
 
-import android.content.res.Resources.Theme
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
@@ -23,15 +23,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
-import com.dshagapps.tfi_software.domain.entities.Stock
+import com.dshagapps.tfi_software.presentation.models.StockUiModel
 import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 import java.text.DecimalFormat
 
@@ -74,12 +71,18 @@ fun StartSaleScreen(
                 .fillMaxSize()
                 .padding(top = 8.dp)
         ) {
-            this.items(stockList.value) {
+            this.items(stockList.value) { stock ->
                 StockCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp),
-                    stock = it
+                    stock = stock,
+                    onAddProduct = {
+                        viewModel.addProductToSale(stock)
+                    },
+                    onRemoveProduct = {
+                        viewModel.removeProductFromSale(stock)
+                    }
                 )
             }
         }
@@ -90,16 +93,15 @@ fun StartSaleScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StockCard(
     modifier: Modifier = Modifier,
-    stock: Stock,
-    onClick: () -> Unit = {}
+    stock: StockUiModel,
+    onAddProduct: () -> Unit,
+    onRemoveProduct: () -> Unit
 ) {
     Card(
-        modifier = modifier,
-        onClick = onClick
+        modifier = modifier
     ){
         Column (
             modifier = Modifier
@@ -125,6 +127,29 @@ private fun StockCard(
                 title = "Precio:",
                 description = "$${DecimalFormat("#.00").format(stock.price)}"
             )
+
+            StyledText(
+                title = "${stock.quantity}:",
+                description = "${stock.maxQuantity}"
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = onAddProduct
+                ) {
+                    Text(text = "Agregar a la venta")
+                }
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = onRemoveProduct
+                ) {
+                    Text(text = "Quitar de la venta" )
+                }
+            }
         }
     }
 }

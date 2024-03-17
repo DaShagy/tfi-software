@@ -1,4 +1,4 @@
-package com.dshagapps.tfi_software.presentation
+package com.dshagapps.tfi_software.presentation.activities
 
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel

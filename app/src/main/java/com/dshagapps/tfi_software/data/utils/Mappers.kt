@@ -1,4 +1,4 @@
-package com.dshagapps.tfi_software.data
+package com.dshagapps.tfi_software.data.utils
 
 import com.dshagapps.tfi_software.data.service.response.StockResponse
 import com.dshagapps.tfi_software.domain.entities.Stock
