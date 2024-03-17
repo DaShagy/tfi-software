@@ -101,7 +101,7 @@ class SaleViewModel(
                     line
                 }
             }
-            saleLines.value = updatedSaleLines
+            saleLines.value = updatedSaleLines.filterNot { line -> line.stock.quantity == 0 }
         }
 
         updateFilteredStockList()
@@ -109,7 +109,7 @@ class SaleViewModel(
 
     private fun updateFilteredStockList() {
         filteredStockList.value = filteredStockList.value.map {  stock ->
-            saleLines.value.find { line -> line.stock.id == stock.id }?.stock ?: stock
+            saleLines.value.find { line -> line.stock.id == stock.id }?.stock ?: stock.copy(quantity = 0)
         }
     }
 }

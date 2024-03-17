@@ -48,6 +48,8 @@ fun StartSaleScreen(
 
     val stockList = viewModel.filteredStockList.collectAsState()
 
+    val saleLines = viewModel.saleLines.collectAsState()
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -90,7 +92,8 @@ fun StartSaleScreen(
 
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = onContinue
+            onClick = onContinue,
+            enabled = saleLines.value.isNotEmpty()
         ) {
             Text("Siguiente")
         }
