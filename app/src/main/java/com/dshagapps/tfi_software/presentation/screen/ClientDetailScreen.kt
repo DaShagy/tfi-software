@@ -39,6 +39,7 @@ import kotlinx.coroutines.launch
 fun ClientDetailScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
+    onContinue: () -> Unit,
     viewModel: SaleViewModel
 ) {
     BackHandler(onBack = onBack)
@@ -47,10 +48,14 @@ fun ClientDetailScreen(
     val coroutineScope = rememberCoroutineScope()
 
     var client by remember { mutableStateOf(ClientUiModel.anonymousClient) }
-    var isAnonymousClient by remember { mutableStateOf(viewModel.isNominalClient.not()) }
+    var isAnonymousClientChecked by remember { mutableStateOf(viewModel.isNominalClient.not()) }
     var cuit by remember { mutableStateOf("") }
 
     val isAnonymousClientCheckboxEnabled = viewModel.isNominalClient.not()
+
+    var isCardPaymentChecked by remember { mutableStateOf(false) }
+
+    val isPrimaryButtonEnabled = isAnonymousClientChecked || client.isAnonymousClient().not()
 
     Column(
         modifier = modifier
@@ -59,14 +64,28 @@ fun ClientDetailScreen(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AnonymousClientCheckbox(
+        LabeledCheckbox(
             modifier = Modifier.fillMaxWidth(),
-            checked = if (isAnonymousClientCheckboxEnabled) isAnonymousClient else false,
-            onCheckedChange = { isAnonymousClient = !isAnonymousClient },
+            label = "Es cliente anónimo",
+            checked = if (isAnonymousClientCheckboxEnabled) isAnonymousClientChecked else false,
+            onCheckedChange = {
+                isAnonymousClientChecked = !isAnonymousClientChecked
+                if (isAnonymousClientChecked) isCardPaymentChecked = false
+            },
             enabled = isAnonymousClientCheckboxEnabled
         )
 
-        if (!isAnonymousClient) {
+        LabeledCheckbox(
+            modifier = Modifier.fillMaxWidth(),
+            label = "Pago con tarjeta",
+            checked = isCardPaymentChecked,
+            onCheckedChange = {
+                isCardPaymentChecked = !isCardPaymentChecked
+                if (isCardPaymentChecked) isAnonymousClientChecked = false
+            }
+        )
+
+        if (!isAnonymousClientChecked) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -77,7 +96,10 @@ fun ClientDetailScreen(
                     value = cuit,
                     onValueChange = { cuit = it },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    maxLines = 1
+                    maxLines = 1,
+                    label = {
+                        Text("CUIT")
+                    }
                 )
 
                 Button(
@@ -91,7 +113,7 @@ fun ClientDetailScreen(
                         }
                     }
                 ) {
-                    Text("Buscar CUIT")
+                    Text("Buscar Cliente")
                 }
             }
 
@@ -106,20 +128,21 @@ fun ClientDetailScreen(
         Spacer(modifier = modifier.weight(1.0f))
 
         ScreenBottomButtons(
-            onPrimaryButton = onBack,
+            onPrimaryButton = onContinue,
             onSecondaryButton = onBack,
-            primaryButtonEnabled = isAnonymousClient || client.isAnonymousClient().not()
+            primaryButtonEnabled = isPrimaryButtonEnabled
         )
     }
 }
 
 
 @Composable
-private fun AnonymousClientCheckbox(
+private fun LabeledCheckbox(
     modifier: Modifier = Modifier,
+    label: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    enabled: Boolean
+    enabled: Boolean = true
 ) {
     Row(
         modifier = modifier,
@@ -132,7 +155,7 @@ private fun AnonymousClientCheckbox(
             enabled = enabled
         )
         Text(
-            text = "Es cliente anónimo",
+            text = label,
             style = TextStyle(
                 color = if (enabled) Color.Unspecified else Color.LightGray
             )

@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.dshagapps.tfi_software.presentation.screen.CardPaymentFormScreen
 import com.dshagapps.tfi_software.presentation.screen.ClientDetailScreen
 import com.dshagapps.tfi_software.presentation.screen.MainScreen
 import com.dshagapps.tfi_software.presentation.screen.SaleLinesDetailScreen
@@ -62,6 +63,18 @@ fun Navigation(
 
         composable("clientDetailScreen") {
             ClientDetailScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onContinue = {
+                    navController.navigate("cardPaymentFormScreen")
+                },
+                viewModel = viewModel
+            )
+        }
+
+        composable("cardPaymentFormScreen") {
+            CardPaymentFormScreen(
                 onBack = {
                     navController.popBackStack()
                 },
