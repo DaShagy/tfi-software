@@ -36,8 +36,8 @@ fun CardPaymentFormScreen(
 
     var cardNumber by remember { mutableStateOf("") }
     var cardHolder by remember { mutableStateOf(clientFullName) }
-    var cardExpirationMonth by remember { mutableStateOf("") }
-    var cardExpirationYear by remember { mutableStateOf("") }
+    var cardExpiryMonth by remember { mutableStateOf("") }
+    var cardExpiryYear by remember { mutableStateOf("") }
     var cardCcv by remember { mutableStateOf("") }
 
     Column(
@@ -78,9 +78,9 @@ fun CardPaymentFormScreen(
         ) {
             OutlinedTextField(
                 modifier = modifier.weight(1.0f),
-                value = cardExpirationMonth,
+                value = cardExpiryMonth,
                 onValueChange = {
-                    if (it.length <= 2) cardExpirationMonth = if(it.isNotEmpty() && it.toInt() > 12) "12" else it
+                    if (it.length <= 2) cardExpiryMonth = if(it.isNotEmpty() && it.toInt() > 12) "12" else it
                 },
                 label = { Text("Mes") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -88,8 +88,8 @@ fun CardPaymentFormScreen(
             )
             OutlinedTextField(
                 modifier = modifier.weight(1.0f),
-                value = cardExpirationYear,
-                onValueChange = { if (it.length <= 2) cardExpirationYear = it },
+                value = cardExpiryYear,
+                onValueChange = { if (it.length <= 2) cardExpiryYear = it },
                 label = { Text("Año") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 maxLines = 1,
@@ -113,7 +113,8 @@ fun CardPaymentFormScreen(
                 viewModel.startSale(
                     cardNumber = cardNumber,
                     cardHolder = cardHolder,
-                    cardExpiry = "$cardExpirationMonth$cardExpirationYear",
+                    cardExpiryMonth = cardExpiryMonth,
+                    cardExpiryYear = cardExpiryYear,
                     cardCcv = cardCcv,
                     amount = "100000"
                 )

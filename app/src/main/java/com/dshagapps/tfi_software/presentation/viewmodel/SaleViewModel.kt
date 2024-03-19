@@ -57,7 +57,8 @@ class SaleViewModel(
     fun startSale(
         cardNumber: String,
         cardHolder: String,
-        cardExpiry: String,
+        cardExpiryMonth: String,
+        cardExpiryYear: String,
         cardCcv: String,
         amount: String
     ) = viewModelScope.launch(Dispatchers.IO) {
@@ -67,10 +68,11 @@ class SaleViewModel(
                 card = Card(
                     number = cardNumber,
                     holder = cardHolder,
-                    expiry = cardExpiry,
+                    expiryMonth = cardExpiryMonth,
+                    expiryYear = cardExpiryYear,
                     ccv = cardCcv
                 ),
-                amount = BigInteger(amount)
+                amount = amount
             )
         ).fold(
             onSuccess = {},

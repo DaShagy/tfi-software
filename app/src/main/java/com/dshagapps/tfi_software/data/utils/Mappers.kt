@@ -11,7 +11,6 @@ import com.dshagapps.tfi_software.domain.entities.Sale
 import com.dshagapps.tfi_software.domain.entities.SaleLine
 import com.dshagapps.tfi_software.domain.entities.Stock
 import com.dshagapps.tfi_software.domain.enums.TributeCondition
-import java.util.ArrayList
 
 internal fun StockResponse.toStock(): Stock =
     Stock(
@@ -37,15 +36,17 @@ internal fun ClientResponse.toClient(): Client =
 
 internal fun Sale.toRequestBody(): SaleRequestBody =
     SaleRequestBody(
-        this.saleLines.toRequestBody(),
-        this.card.toRequestBody()
+        lineasDeVenta = saleLines.toRequestBody(),
+        tarjeta = card.toRequestBody(),
+        monto = amount
     )
 
 private fun Card.toRequestBody(): CardRequestBody =
     CardRequestBody(
         titular = holder,
         numero = number,
-        fechaVencimiento = expiry,
+        mesVencimiento = expiryMonth,
+        anioVencimiento = expiryYear,
         ccv = ccv
     )
 
