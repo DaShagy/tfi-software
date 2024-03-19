@@ -31,6 +31,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.dshagapps.tfi_software.presentation.models.ClientUiModel
 import com.dshagapps.tfi_software.presentation.ui.components.ScreenBottomButtons
+import com.dshagapps.tfi_software.presentation.utils.fullName
 import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 import kotlinx.coroutines.launch
 
@@ -39,7 +40,7 @@ import kotlinx.coroutines.launch
 fun ClientDetailScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
-    onContinue: () -> Unit,
+    onContinue: (clientName: String) -> Unit,
     viewModel: SaleViewModel
 ) {
     BackHandler(onBack = onBack)
@@ -128,7 +129,9 @@ fun ClientDetailScreen(
         Spacer(modifier = modifier.weight(1.0f))
 
         ScreenBottomButtons(
-            onPrimaryButton = onContinue,
+            onPrimaryButton = {
+                onContinue(client.fullName())
+            },
             onSecondaryButton = onBack,
             primaryButtonEnabled = isPrimaryButtonEnabled
         )

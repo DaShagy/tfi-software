@@ -29,12 +29,13 @@ import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 fun CardPaymentFormScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
+    clientFullName: String,
     viewModel: SaleViewModel
 ) {
     BackHandler(onBack = onBack)
 
     var cardNumber by remember { mutableStateOf("") }
-    var cardHolder by remember { mutableStateOf("") }
+    var cardHolder by remember { mutableStateOf(clientFullName) }
     var cardExpirationMonth by remember { mutableStateOf("") }
     var cardExpirationYear by remember { mutableStateOf("") }
     var cardCcv by remember { mutableStateOf("") }
@@ -108,7 +109,15 @@ fun CardPaymentFormScreen(
         )
 
         ScreenBottomButtons(
-            onPrimaryButton = onBack,
+            onPrimaryButton = {
+                viewModel.startSale(
+                    cardNumber = cardNumber,
+                    cardHolder = cardHolder,
+                    cardExpiry = "$cardExpirationMonth$cardExpirationYear",
+                    cardCcv = cardCcv,
+                    amount = "100000"
+                )
+            },
             onSecondaryButton = onBack,
         )
     }

@@ -24,7 +24,7 @@ fun Navigation(
         composable("mainScreen") {
             MainScreen(
                 onStartSale = { branchId ->
-                    navController.navigate("startSaleScreen/$branchId")
+                    navController.navigate("startSaleScreen?branchId=$branchId")
                 },
                 onBack = {
                     if (!navController.popBackStack()) onBack()
@@ -33,7 +33,7 @@ fun Navigation(
         }
 
         composable(
-            route = "startSaleScreen/{branchId}",
+            route = "startSaleScreen?branchId={branchId}",
             arguments = listOf(navArgument("branchId") { type = NavType.IntType })
         ) {
             StartSaleScreen(
@@ -66,19 +66,26 @@ fun Navigation(
                 onBack = {
                     navController.popBackStack()
                 },
-                onContinue = {
-                    navController.navigate("cardPaymentFormScreen")
+                onContinue = { clientName ->
+                    navController.navigate("cardPaymentFormScreen?clientName=${clientName}")
                 },
                 viewModel = viewModel
             )
         }
 
-        composable("cardPaymentFormScreen") {
+        composable(
+            route = "cardPaymentFormScreen?clientName={clientName}",
+            arguments = listOf(navArgument("clientName") {
+                type = NavType.StringType
+                defaultValue = ""
+            })
+        ) {
             CardPaymentFormScreen(
                 onBack = {
                     navController.popBackStack()
                 },
-                viewModel = viewModel
+                viewModel = viewModel,
+                clientFullName = it.arguments?.getString("clientName") ?: ""
             )
         }
     }

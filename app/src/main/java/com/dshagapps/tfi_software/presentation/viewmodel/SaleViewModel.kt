@@ -2,7 +2,9 @@ package com.dshagapps.tfi_software.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dshagapps.tfi_software.domain.entities.Card
 import com.dshagapps.tfi_software.domain.entities.Client
+import com.dshagapps.tfi_software.domain.entities.Sale
 import com.dshagapps.tfi_software.domain.entities.Stock
 import com.dshagapps.tfi_software.domain.repositories.SaleRepository
 import com.dshagapps.tfi_software.domain.rules.AnonymousClientRules
@@ -12,6 +14,7 @@ import com.dshagapps.tfi_software.presentation.models.StockUiModel
 import com.dshagapps.tfi_software.presentation.utils.decrementStockQuantity
 import com.dshagapps.tfi_software.presentation.utils.getTotal
 import com.dshagapps.tfi_software.presentation.utils.incrementStockQuantity
+import com.dshagapps.tfi_software.presentation.utils.toDomainEntity
 import com.dshagapps.tfi_software.presentation.utils.toUiModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +26,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.math.BigInteger
 
 class SaleViewModel(
     private val repository: SaleRepository
@@ -49,6 +53,30 @@ class SaleViewModel(
             onFailure = onFailureCallback
         )
     }.flowOn(Dispatchers.IO)
+
+    fun startSale(
+        cardNumber: String,
+        cardHolder: String,
+        cardExpiry: String,
+        cardCcv: String,
+        amount: String
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        repository.startSale(
+            Sale(
+                saleLines = saleLines.value.toDomainEntity(),
+                card = Card(
+                    number = cardNumber,
+                    holder = cardHolder,
+                    expiry = cardExpiry,
+                    ccv = cardCcv
+                ),
+                amount = BigInteger(amount)
+            )
+        ).fold(
+            onSuccess = {},
+            onFailure = {}
+        )
+    }
 
     fun addProductToSale(stock: StockUiModel) {
         val existingSaleLine = saleLines.value.find { line -> line.stock.id == stock.id }

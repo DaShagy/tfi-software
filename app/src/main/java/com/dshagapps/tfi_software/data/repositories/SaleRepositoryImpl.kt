@@ -2,8 +2,10 @@ package com.dshagapps.tfi_software.data.repositories
 
 import com.dshagapps.tfi_software.data.service.api.Api
 import com.dshagapps.tfi_software.data.utils.toClient
+import com.dshagapps.tfi_software.data.utils.toRequestBody
 import com.dshagapps.tfi_software.data.utils.toStock
 import com.dshagapps.tfi_software.domain.entities.Client
+import com.dshagapps.tfi_software.domain.entities.Sale
 import com.dshagapps.tfi_software.domain.entities.Stock
 import com.dshagapps.tfi_software.domain.repositories.SaleRepository
 
@@ -39,6 +41,20 @@ class SaleRepositoryImpl(
             } else {
                 Result.failure(
                     Exception(response.body()?.error?.get(0) ?: "Client not found")
+                )
+            }
+        }
+    }
+
+    override suspend fun startSale(sale: Sale): Result<String> {
+        api.startSale(sale.toRequestBody()).execute().also { response ->
+            return if (response.isSuccessful) {
+                Result.success(
+                    response.body()!!.content.firstOrNull()?.status ?: "Unknown Status"
+                )
+            } else {
+                Result.failure(
+                    Exception(response.body()?.error?.get(0) ?: "Unexpected Error")
                 )
             }
         }
