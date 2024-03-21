@@ -9,5 +9,7 @@ data class Stock(
     val sizeDescription: String,
     val colorDescription: String,
     val price: Double,
-    val quantity: Int
+    val quantity: Int,
+    val brandDescription: String,
+    val categoryDescription: String
 )

@@ -8,5 +8,7 @@ data class StockUiModel(
     val colorDescription: String,
     val price: Double,
     val quantity: Int = 0,
-    val maxQuantity: Int
+    val maxQuantity: Int,
+    val brandDescription: String,
+    val categoryDescription: String
 )

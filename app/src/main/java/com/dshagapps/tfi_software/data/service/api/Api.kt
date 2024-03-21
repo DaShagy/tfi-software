@@ -3,7 +3,6 @@ package com.dshagapps.tfi_software.data.service.api
 import com.dshagapps.tfi_software.data.service.schemas.requests.SaleRequestBody
 import com.dshagapps.tfi_software.data.service.schemas.responses.BaseResponse
 import com.dshagapps.tfi_software.data.service.schemas.responses.ClientResponse
-import com.dshagapps.tfi_software.data.service.schemas.responses.SaleResponse
 import com.dshagapps.tfi_software.data.service.schemas.responses.StockResponse
 import retrofit2.Call
 import retrofit2.http.Body
@@ -21,5 +20,8 @@ interface Api {
     fun getClientByCuit(@Query("cuit") cuit: String): Call<BaseResponse<ClientResponse>>
 
     @POST("/api/venta/crear-venta")
-    fun startSale(@Body sale: SaleRequestBody): Call<BaseResponse<SaleResponse>>
+    fun startSale(
+        @Body sale: SaleRequestBody,
+        @Query("tipoPago") type: String
+    ): Call<BaseResponse<String>>
 }

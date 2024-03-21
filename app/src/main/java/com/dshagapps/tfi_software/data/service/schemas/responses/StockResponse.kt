@@ -9,5 +9,7 @@ data class StockResponse(
     val colorId: Int,
     val articuloId: Int,
     val talleId: Int,
-    val precio: String
+    val precio: String,
+    val marca: String,
+    val categoria: String
 )

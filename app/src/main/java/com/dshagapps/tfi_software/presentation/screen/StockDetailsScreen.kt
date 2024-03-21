@@ -36,7 +36,7 @@ import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StartSaleScreen(
+fun StockDetailsScreen(
     modifier: Modifier = Modifier,
     branchId: Int = 1,
     onBack: () -> Unit,
@@ -135,33 +135,53 @@ private fun StockCard(
                 .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            StyledText(
-                title = "Prenda:",
-                description = stock.productDescription
-            )
-            StyledText(
-                title = "Color:",
-                description = stock.colorDescription
-            )
-
-            StyledText(
-                title = "Talle:",
-                description = stock.sizeDescription
-            )
-
-            StyledText(
-                title = "Precio:",
-                description = stock.price.toPriceString()
-            )
-
-            StyledText(
-                title = "${stock.quantity}:",
-                description = "${stock.maxQuantity}"
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                StyledText(
+                    title = "Prenda:",
+                    description = stock.productDescription
+                )
+                StyledText(
+                    title = "Marca:",
+                    description = stock.brandDescription
+                )
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                StyledText(
+                    title = "Color:",
+                    description = stock.colorDescription
+                )
+                StyledText(
+                    title = "Talle:",
+                    description = stock.sizeDescription
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                StyledText(
+                    title = "Precio:",
+                    description = stock.price.toPriceString()
+                )
+
+                StyledText(
+                    title = "${stock.quantity}:",
+                    description = "${stock.maxQuantity}"
+                )
+            }
+
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Button(
                     modifier = Modifier.weight(1f),
@@ -199,7 +219,7 @@ private fun StyledText(
     }
 
     Text(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         text = combinedText
     )
 }

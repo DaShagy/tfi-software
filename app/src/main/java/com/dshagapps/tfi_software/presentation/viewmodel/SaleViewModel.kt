@@ -6,12 +6,14 @@ import com.dshagapps.tfi_software.domain.entities.Card
 import com.dshagapps.tfi_software.domain.entities.Client
 import com.dshagapps.tfi_software.domain.entities.Sale
 import com.dshagapps.tfi_software.domain.entities.Stock
+import com.dshagapps.tfi_software.domain.enums.PaymentType
 import com.dshagapps.tfi_software.domain.repositories.SaleRepository
 import com.dshagapps.tfi_software.domain.rules.AnonymousClientRules
 import com.dshagapps.tfi_software.presentation.models.ClientUiModel
 import com.dshagapps.tfi_software.presentation.models.SaleLineUiModel
 import com.dshagapps.tfi_software.presentation.models.StockUiModel
 import com.dshagapps.tfi_software.presentation.utils.decrementStockQuantity
+import com.dshagapps.tfi_software.presentation.utils.formatWithoutDecimalSeparator
 import com.dshagapps.tfi_software.presentation.utils.getTotal
 import com.dshagapps.tfi_software.presentation.utils.incrementStockQuantity
 import com.dshagapps.tfi_software.presentation.utils.toDomainEntity
@@ -60,10 +62,12 @@ class SaleViewModel(
         cardExpiryMonth: String,
         cardExpiryYear: String,
         cardCcv: String,
-        amount: String
+        clientCuit: String,
+        onSuccessCallback: (String) -> Unit,
+        onFailureCallback: (Throwable) -> Unit
     ) = viewModelScope.launch(Dispatchers.IO) {
         repository.startSale(
-            Sale(
+            sale = Sale(
                 saleLines = saleLines.value.toDomainEntity(),
                 card = Card(
                     number = cardNumber,
@@ -72,13 +76,34 @@ class SaleViewModel(
                     expiryYear = cardExpiryYear,
                     ccv = cardCcv
                 ),
-                amount = amount
-            )
+                amount = saleLines.value.getTotal().formatWithoutDecimalSeparator(),
+                clientCuit = clientCuit
+            ),
+            type = PaymentType.CARD
         ).fold(
-            onSuccess = {},
-            onFailure = {}
+            onSuccess = onSuccessCallback,
+            onFailure = onFailureCallback
         )
     }
+    fun startSale(
+        clientCuit: String,
+        onSuccessCallback: (String) -> Unit,
+        onFailureCallback: (Throwable) -> Unit
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        repository.startSale(
+            Sale(
+                saleLines = saleLines.value.toDomainEntity(),
+                card = null,
+                amount = saleLines.value.getTotal().formatWithoutDecimalSeparator(),
+                clientCuit = clientCuit
+            ),
+            type = PaymentType.CASH
+        ).fold(
+            onSuccess = onSuccessCallback,
+            onFailure = onFailureCallback
+        )
+    }
+
 
     fun addProductToSale(stock: StockUiModel) {
         val existingSaleLine = saleLines.value.find { line -> line.stock.id == stock.id }

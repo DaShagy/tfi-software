@@ -2,8 +2,9 @@ package com.dshagapps.tfi_software.domain.entities
 
 data class Sale(
     val saleLines: List<SaleLine>,
-    val card: Card,
-    val amount: String
+    val card: Card?,
+    val amount: String,
+    val clientCuit: String
 )
 
 data class Card(

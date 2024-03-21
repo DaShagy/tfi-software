@@ -11,7 +11,8 @@ import com.dshagapps.tfi_software.presentation.screen.CardPaymentFormScreen
 import com.dshagapps.tfi_software.presentation.screen.ClientDetailScreen
 import com.dshagapps.tfi_software.presentation.screen.MainScreen
 import com.dshagapps.tfi_software.presentation.screen.SaleLinesDetailScreen
-import com.dshagapps.tfi_software.presentation.screen.StartSaleScreen
+import com.dshagapps.tfi_software.presentation.screen.SaleResultScreen
+import com.dshagapps.tfi_software.presentation.screen.StockDetailsScreen
 import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 
 @Composable
@@ -24,7 +25,7 @@ fun Navigation(
         composable("mainScreen") {
             MainScreen(
                 onStartSale = { branchId ->
-                    navController.navigate("startSaleScreen?branchId=$branchId")
+                    navController.navigate("stockDetailsScreen?branchId=$branchId")
                 },
                 onBack = {
                     if (!navController.popBackStack()) onBack()
@@ -33,10 +34,10 @@ fun Navigation(
         }
 
         composable(
-            route = "startSaleScreen?branchId={branchId}",
+            route = "stockDetailsScreen?branchId={branchId}",
             arguments = listOf(navArgument("branchId") { type = NavType.IntType })
         ) {
-            StartSaleScreen(
+            StockDetailsScreen(
                 branchId = it.arguments?.getInt("branchId") ?: 1,
                 onBack = {
                     navController.popBackStack()
@@ -66,27 +67,47 @@ fun Navigation(
                 onBack = {
                     navController.popBackStack()
                 },
-                onContinue = { clientName ->
-                    navController.navigate("cardPaymentFormScreen?clientName=${clientName}")
+                onContinue = { clientName, cuit ->
+                    navController.navigate("cardPaymentFormScreen?clientName=$clientName&cuit=$cuit")
+                },
+                onSale = {
+                    navController.navigate("saleResultScreen")
                 },
                 viewModel = viewModel
             )
         }
 
         composable(
-            route = "cardPaymentFormScreen?clientName={clientName}",
-            arguments = listOf(navArgument("clientName") {
-                type = NavType.StringType
-                defaultValue = ""
-            })
+            route = "cardPaymentFormScreen?clientName={clientName}&cuit={cuit}",
+            arguments = listOf(
+                navArgument("clientName") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+                navArgument("cuit") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
+            )
         ) {
             CardPaymentFormScreen(
                 onBack = {
                     navController.popBackStack()
                 },
+                onSale = {
+                    navController.navigate("saleResultScreen")
+                },
                 viewModel = viewModel,
-                clientFullName = it.arguments?.getString("clientName") ?: ""
+                clientFullName = it.arguments?.getString("clientName") ?: "",
+                clientCuit = it.arguments?.getString("cuit") ?: ""
             )
+        }
+
+        composable("saleResultScreen") {
+            SaleResultScreen {
+                navController.popBackStack("mainScreen", false)
+                viewModel.cleanStates()
+            }
         }
     }
 }

@@ -27,12 +27,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import com.dshagapps.tfi_software.presentation.models.ClientUiModel
 import com.dshagapps.tfi_software.presentation.ui.components.ScreenBottomButtons
 import com.dshagapps.tfi_software.presentation.utils.fullName
+import com.dshagapps.tfi_software.presentation.utils.getTotal
+import com.dshagapps.tfi_software.presentation.utils.toPriceString
 import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,8 +45,9 @@ import kotlinx.coroutines.launch
 fun ClientDetailScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
-    onContinue: (clientName: String) -> Unit,
-    viewModel: SaleViewModel
+    onContinue: (clientName: String, clientCuit: String) -> Unit,
+    onSale: () -> Unit,
+    viewModel: SaleViewModel,
 ) {
     BackHandler(onBack = onBack)
 
@@ -128,9 +134,41 @@ fun ClientDetailScreen(
 
         Spacer(modifier = modifier.weight(1.0f))
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            Text (
+                text = "Total: ${viewModel.saleLines.value.getTotal().toPriceString()}",
+                fontSize = 7.em,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
         ScreenBottomButtons(
             onPrimaryButton = {
-                onContinue(client.fullName())
+                if (isCardPaymentChecked) {
+                    onContinue(
+                        client.fullName(),
+                        client.cuit
+                    )
+                } else {
+                    viewModel.startSale(
+                        clientCuit = client.cuit,
+                        onSuccessCallback = {
+                            coroutineScope.launch(Dispatchers.Main) {
+                                onSale()
+                            }
+                        },
+                        onFailureCallback = {
+                            coroutineScope.launch {
+                                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    )
+                }
             },
             onSecondaryButton = onBack,
             primaryButtonEnabled = isPrimaryButtonEnabled

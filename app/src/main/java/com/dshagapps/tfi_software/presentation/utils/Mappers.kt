@@ -13,7 +13,9 @@ fun Stock.toUiModel(): StockUiModel =
         sizeDescription = sizeDescription,
         colorDescription = colorDescription,
         price = price,
-        maxQuantity = quantity
+        maxQuantity = quantity,
+        brandDescription = brandDescription,
+        categoryDescription = categoryDescription
     )
 
 fun Client.toUiModel(): ClientUiModel =

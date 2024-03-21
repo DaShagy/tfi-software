@@ -2,8 +2,9 @@ package com.dshagapps.tfi_software.data.service.schemas.requests
 
 data class SaleRequestBody(
     val lineasDeVenta: List<SaleLineRequestBody>,
-    val tarjeta: CardRequestBody,
-    val monto: String
+    val tarjeta: CardRequestBody?,
+    val monto: String,
+    val clienteCuit: String,
 )
 
 data class CardRequestBody(

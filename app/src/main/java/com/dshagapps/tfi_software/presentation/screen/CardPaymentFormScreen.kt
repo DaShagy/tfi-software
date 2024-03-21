@@ -1,5 +1,6 @@
 package com.dshagapps.tfi_software.presentation.screen
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,23 +17,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.dshagapps.tfi_software.presentation.ui.components.ScreenBottomButtons
 import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardPaymentFormScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
+    onSale: () -> Unit,
     clientFullName: String,
-    viewModel: SaleViewModel
+    clientCuit: String,
+    viewModel: SaleViewModel,
 ) {
     BackHandler(onBack = onBack)
+
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     var cardNumber by remember { mutableStateOf("") }
     var cardHolder by remember { mutableStateOf(clientFullName) }
@@ -116,7 +126,17 @@ fun CardPaymentFormScreen(
                     cardExpiryMonth = cardExpiryMonth,
                     cardExpiryYear = cardExpiryYear,
                     cardCcv = cardCcv,
-                    amount = "100000"
+                    clientCuit = clientCuit,
+                    onSuccessCallback = {
+                        coroutineScope.launch(Dispatchers.Main) {
+                            onSale()
+                        }
+                    },
+                    onFailureCallback = {
+                        coroutineScope.launch {
+                            Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 )
             },
             onSecondaryButton = onBack,

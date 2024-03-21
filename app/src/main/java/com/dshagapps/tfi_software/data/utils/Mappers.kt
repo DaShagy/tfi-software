@@ -22,7 +22,9 @@ internal fun StockResponse.toStock(): Stock =
         sizeDescription = talle,
         colorDescription = color,
         price = precio.toDoubleOrNull() ?: 0.0,
-        quantity = cantidad
+        quantity = cantidad,
+        brandDescription = marca,
+        categoryDescription = categoria
     )
 
 internal fun ClientResponse.toClient(): Client =
@@ -37,8 +39,9 @@ internal fun ClientResponse.toClient(): Client =
 internal fun Sale.toRequestBody(): SaleRequestBody =
     SaleRequestBody(
         lineasDeVenta = saleLines.toRequestBody(),
-        tarjeta = card.toRequestBody(),
-        monto = amount
+        tarjeta = card?.toRequestBody(),
+        monto = amount,
+        clienteCuit = clientCuit
     )
 
 private fun Card.toRequestBody(): CardRequestBody =
