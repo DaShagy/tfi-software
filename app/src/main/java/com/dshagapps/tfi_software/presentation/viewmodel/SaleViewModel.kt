@@ -36,18 +36,22 @@ class SaleViewModel(
 
     val saleLines: MutableStateFlow<List<SaleLineUiModel>> = MutableStateFlow(emptyList())
 
-    fun getStockByBranch(branchId: Int): Flow<List<StockUiModel>> = flow<List<StockUiModel>> {
+    fun getStockByBranch(
+        branchId: Int,
+        onFailureCallback: (Throwable) -> Unit
+    ): Flow<List<StockUiModel>> = flow {
         repository.getStockByBranchId(branchId).fold(
             onSuccess = { stockList ->
                 emit(stockList.map { stock -> stock.toUiModel() })
             },
-            onFailure = {
-                emit(emptyList())
-            }
+            onFailure = onFailureCallback
         )
     }.flowOn(Dispatchers.IO)
 
-    fun getClientByCuit(cuit: String, onFailureCallback: (Throwable) -> Unit): Flow<ClientUiModel> = flow {
+    fun getClientByCuit(
+        cuit: String,
+        onFailureCallback: (Throwable) -> Unit
+    ): Flow<ClientUiModel> = flow {
         repository.getClientByCuit(cuit).fold(
             onSuccess = { client ->
                 emit(client.toUiModel())

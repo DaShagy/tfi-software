@@ -1,5 +1,6 @@
 package com.dshagapps.tfi_software.presentation.screen
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -33,6 +35,7 @@ import com.dshagapps.tfi_software.presentation.models.StockUiModel
 import com.dshagapps.tfi_software.presentation.ui.components.ScreenBottomButtons
 import com.dshagapps.tfi_software.presentation.utils.toPriceString
 import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +47,8 @@ fun StockDetailsScreen(
     viewModel: SaleViewModel
 ) {
     BackHandler(onBack = onBack)
+
+    val context = LocalContext.current
 
     val saleLines = viewModel.saleLines.collectAsState()
 
@@ -113,7 +118,16 @@ fun StockDetailsScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.getStockByBranch(branchId).collect { stock ->
+        viewModel.getStockByBranch(
+            branchId = branchId,
+            onFailureCallback = {
+                this.launch {
+                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                }.invokeOnCompletion {
+                    onBack()
+                }
+            }
+        ).collect { stock ->
             stockList = stock
         }
     }

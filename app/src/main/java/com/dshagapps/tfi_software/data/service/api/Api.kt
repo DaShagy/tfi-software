@@ -14,7 +14,7 @@ import retrofit2.http.Query
 interface Api {
 
     @GET("/api/stock/branch/{branchId}")
-    fun getStockByBranch(@Path("branchId")branchId: Int): Call<BaseResponse<StockResponse>>
+    fun getStockByBranch(@Path("branchId")branchId: Int): Call<BaseResponse<List<StockResponse>>>
 
     @GET("/api/cliente")
     fun getClientByCuit(@Query("cuit") cuit: String): Call<BaseResponse<ClientResponse>>

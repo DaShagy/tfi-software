@@ -1,6 +1,6 @@
 package com.dshagapps.tfi_software.data.repositories
 
-import android.util.Log
+import com.dshagapps.tfi_software.data.service.adapters.ErrorResponseDeserializer.deserialize
 import com.dshagapps.tfi_software.data.service.api.Api
 import com.dshagapps.tfi_software.data.utils.toClient
 import com.dshagapps.tfi_software.data.utils.toRequestBody
@@ -15,14 +15,14 @@ class SaleRepositoryImpl(
     private val api: Api
 ): SaleRepository {
     override suspend fun getStockByBranchId(branchId: Int): Result<List<Stock>> {
-        api.getStockByBranch(branchId).execute().also {
-            return if (it.isSuccessful) {
+        api.getStockByBranch(branchId).execute().also { response ->
+            return if (response.isSuccessful) {
                 Result.success(
-                    it.body()!!.content.map { response -> response.toStock() }
+                    response.body()!!.content.map { stockResponse -> stockResponse.toStock() }
                 )
             } else {
                 Result.failure(
-                    Exception(it.body()?.error?.get(0) ?: "Unexpected error")
+                    Exception(deserialize(response.errorBody()).message)
                 )
             }
         }
@@ -31,18 +31,10 @@ class SaleRepositoryImpl(
     override suspend fun getClientByCuit(cuit: String): Result<Client> {
         api.getClientByCuit(cuit).execute().also { response ->
             return if (response.isSuccessful) {
-                if (response.body()!!.content.isEmpty()) {
-                    Result.failure(
-                        Exception("Client not found")
-                    )
-                } else {
-                    Result.success(
-                        response.body()!!.content[0].toClient()
-                    )
-                }
+                Result.success(response.body()!!.content.toClient())
             } else {
                 Result.failure(
-                    Exception(response.body()?.error?.get(0) ?: "Client not found")
+                    Exception(deserialize(response.errorBody()).message)
                 )
             }
         }
@@ -55,17 +47,10 @@ class SaleRepositoryImpl(
         }
         api.startSale(sale.toRequestBody(), paymentType).execute().also { response ->
             return if (response.isSuccessful) {
-                if (response.body()!!.content.isEmpty()) {
-                    Result.failure(
-                        Exception(response.body()?.error?.get(0) ?: "Unexpected Error")
-                    )
-                } else {
-                    Result.success(response.body()!!.content[0])
-                }
+                Result.success(response.body()!!.content)
             } else {
-                Log.d("SALE", response.message())
                 Result.failure(
-                    Exception(response.body()?.error?.get(0) ?: "Unexpected Error")
+                    Exception(deserialize(response.errorBody()).message)
                 )
             }
         }
