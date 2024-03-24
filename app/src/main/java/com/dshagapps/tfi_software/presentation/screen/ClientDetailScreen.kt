@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import com.dshagapps.tfi_software.presentation.models.ClientUiModel
+import com.dshagapps.tfi_software.presentation.ui.components.Loader
 import com.dshagapps.tfi_software.presentation.ui.components.ScreenBottomButtons
 import com.dshagapps.tfi_software.presentation.utils.fullName
 import com.dshagapps.tfi_software.presentation.utils.getTotal
@@ -54,6 +55,8 @@ fun ClientDetailScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
+    var loading by remember { mutableStateOf(false) }
+
     var client by remember { mutableStateOf(ClientUiModel.anonymousClient) }
     var isAnonymousClientChecked by remember { mutableStateOf(viewModel.isNominalClient.not()) }
     var cuit by remember { mutableStateOf("") }
@@ -62,117 +65,126 @@ fun ClientDetailScreen(
 
     var isCardPaymentChecked by remember { mutableStateOf(false) }
 
-    val isPrimaryButtonEnabled = isAnonymousClientChecked || client.isAnonymousClient().not()
+    val isPrimaryButtonEnabled = (isAnonymousClientChecked || client.isAnonymousClient().not()) && loading.not()
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        LabeledCheckbox(
-            modifier = Modifier.fillMaxWidth(),
-            label = "Es cliente anónimo",
-            checked = if (isAnonymousClientCheckboxEnabled) isAnonymousClientChecked else false,
-            onCheckedChange = {
-                isAnonymousClientChecked = !isAnonymousClientChecked
-                if (isAnonymousClientChecked) isCardPaymentChecked = false
-            },
-            enabled = isAnonymousClientCheckboxEnabled
-        )
+    if (loading) {
+        Loader()
+    } else {
 
-        LabeledCheckbox(
-            modifier = Modifier.fillMaxWidth(),
-            label = "Pago con tarjeta",
-            checked = isCardPaymentChecked,
-            onCheckedChange = {
-                isCardPaymentChecked = !isCardPaymentChecked
-                if (isCardPaymentChecked) isAnonymousClientChecked = false
-            }
-        )
-
-        if (!isAnonymousClientChecked) {
-            Row(
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            LabeledCheckbox(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    modifier = Modifier.weight(1.0f),
-                    value = cuit,
-                    onValueChange = { cuit = it },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    maxLines = 1,
-                    label = {
-                        Text("CUIT")
-                    }
-                )
+                label = "Es cliente anónimo",
+                checked = if (isAnonymousClientCheckboxEnabled) isAnonymousClientChecked else false,
+                onCheckedChange = {
+                    isAnonymousClientChecked = !isAnonymousClientChecked
+                    if (isAnonymousClientChecked) isCardPaymentChecked = false
+                },
+                enabled = isAnonymousClientCheckboxEnabled
+            )
 
-                Button(
-                    onClick = {
-                        coroutineScope.launch {
-                            viewModel.getClientByCuit(cuit) {
-                                this.launch {
+            LabeledCheckbox(
+                modifier = Modifier.fillMaxWidth(),
+                label = "Pago con tarjeta",
+                checked = isCardPaymentChecked,
+                onCheckedChange = {
+                    isCardPaymentChecked = !isCardPaymentChecked
+                    if (isCardPaymentChecked) isAnonymousClientChecked = false
+                }
+            )
+
+            if (!isAnonymousClientChecked) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        modifier = Modifier.weight(1.0f),
+                        value = cuit,
+                        onValueChange = { cuit = it },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        maxLines = 1,
+                        label = {
+                            Text("CUIT")
+                        }
+                    )
+
+                    Button(
+                        onClick = {
+                            coroutineScope.launch {
+                                viewModel.getClientByCuit(cuit) {
+                                    this.launch {
+                                        Toast.makeText(context, it.message, Toast.LENGTH_SHORT)
+                                            .show()
+                                    }
+                                }.collect { client = it }
+                            }
+                        }
+                    ) {
+                        Text("Buscar Cliente")
+                    }
+                }
+
+                if (client.isAnonymousClient().not()) {
+                    ClientCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        clientUiModel = client
+                    )
+                }
+            }
+
+            Spacer(modifier = modifier.weight(1.0f))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Text(
+                    text = "Total: ${viewModel.saleLines.value.getTotal().toPriceString()}",
+                    fontSize = 7.em,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            ScreenBottomButtons(
+                onPrimaryButton = {
+                    loading = true
+                    if (isCardPaymentChecked) {
+                        onContinue(
+                            client.fullName(),
+                            client.cuit
+                        )
+                    } else {
+                        viewModel.startSale(
+                            clientCuit = client.cuit,
+                            onSuccessCallback = {
+                                loading = false
+                                coroutineScope.launch(Dispatchers.Main) {
+                                    onSale()
+                                }
+                            },
+                            onFailureCallback = {
+                                loading = false
+                                coroutineScope.launch {
                                     Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
                                 }
-                            }.collect { client = it }
-                        }
+                            }
+                        )
                     }
-                ) {
-                    Text("Buscar Cliente")
-                }
-            }
-
-            if (client.isAnonymousClient().not()) {
-                ClientCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    clientUiModel = client
-                )
-            }
-        }
-
-        Spacer(modifier = modifier.weight(1.0f))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp),
-            horizontalArrangement = Arrangement.End
-        ) {
-            Text (
-                text = "Total: ${viewModel.saleLines.value.getTotal().toPriceString()}",
-                fontSize = 7.em,
-                fontWeight = FontWeight.Bold
+                },
+                onSecondaryButton = onBack,
+                primaryButtonEnabled = isPrimaryButtonEnabled
             )
         }
-
-        ScreenBottomButtons(
-            onPrimaryButton = {
-                if (isCardPaymentChecked) {
-                    onContinue(
-                        client.fullName(),
-                        client.cuit
-                    )
-                } else {
-                    viewModel.startSale(
-                        clientCuit = client.cuit,
-                        onSuccessCallback = {
-                            coroutineScope.launch(Dispatchers.Main) {
-                                onSale()
-                            }
-                        },
-                        onFailureCallback = {
-                            coroutineScope.launch {
-                                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    )
-                }
-            },
-            onSecondaryButton = onBack,
-            primaryButtonEnabled = isPrimaryButtonEnabled
-        )
     }
 }
 

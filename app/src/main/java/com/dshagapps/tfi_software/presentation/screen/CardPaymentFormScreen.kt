@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.dshagapps.tfi_software.presentation.ui.components.Loader
 import com.dshagapps.tfi_software.presentation.ui.components.ScreenBottomButtons
 import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 import kotlinx.coroutines.Dispatchers
@@ -44,102 +45,114 @@ fun CardPaymentFormScreen(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    var loading by remember { mutableStateOf(false) }
+
     var cardNumber by remember { mutableStateOf("") }
     var cardHolder by remember { mutableStateOf(clientFullName) }
     var cardExpiryMonth by remember { mutableStateOf("") }
     var cardExpiryYear by remember { mutableStateOf("") }
     var cardCcv by remember { mutableStateOf("") }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ){
-        Row(
-            modifier = modifier.fillMaxWidth()
+    if (loading) {
+        Loader()
+    } else {
+
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            OutlinedTextField(
-                modifier = modifier.fillMaxWidth(),
-                value = cardNumber,
-                onValueChange = { if (it.length <= 16) cardNumber = it },
-                label = { Text("Tarjeta") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                maxLines = 1
-            )
-        }
-
-        Row(
-            modifier = modifier.fillMaxWidth()
-        ) {
-            OutlinedTextField(
-                modifier = modifier.fillMaxWidth(),
-                value = cardHolder,
-                onValueChange = { cardHolder = it },
-                label = { Text("Titular") },
-                maxLines = 1,
-            )
-        }
-
-        Row(
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedTextField(
-                modifier = modifier.weight(1.0f),
-                value = cardExpiryMonth,
-                onValueChange = {
-                    if (it.length <= 2) cardExpiryMonth = if(it.isNotEmpty() && it.toInt() > 12) "12" else it
-                },
-                label = { Text("Mes") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                maxLines = 1,
-            )
-            OutlinedTextField(
-                modifier = modifier.weight(1.0f),
-                value = cardExpiryYear,
-                onValueChange = { if (it.length <= 2) cardExpiryYear = it },
-                label = { Text("Año") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                maxLines = 1,
-            )
-            OutlinedTextField(
-                modifier = modifier.weight(1.0f),
-                value = cardCcv,
-                onValueChange = { if (it.length <= 3) cardCcv = it },
-                label = { Text("CCV") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                maxLines = 1,
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.weight(1.0f)
-        )
-
-        ScreenBottomButtons(
-            onPrimaryButton = {
-                viewModel.startSale(
-                    cardNumber = cardNumber,
-                    cardHolder = cardHolder,
-                    cardExpiryMonth = cardExpiryMonth,
-                    cardExpiryYear = cardExpiryYear,
-                    cardCcv = cardCcv,
-                    clientCuit = clientCuit,
-                    onSuccessCallback = {
-                        coroutineScope.launch(Dispatchers.Main) {
-                            onSale()
-                        }
-                    },
-                    onFailureCallback = {
-                        coroutineScope.launch {
-                            Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
-                        }
-                    }
+            Row(
+                modifier = modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    modifier = modifier.fillMaxWidth(),
+                    value = cardNumber,
+                    onValueChange = { if (it.length <= 16) cardNumber = it },
+                    label = { Text("Tarjeta") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    maxLines = 1
                 )
-            },
-            onSecondaryButton = onBack,
-        )
+            }
+
+            Row(
+                modifier = modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    modifier = modifier.fillMaxWidth(),
+                    value = cardHolder,
+                    onValueChange = { cardHolder = it },
+                    label = { Text("Titular") },
+                    maxLines = 1,
+                )
+            }
+
+            Row(
+                modifier = modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    modifier = modifier.weight(1.0f),
+                    value = cardExpiryMonth,
+                    onValueChange = {
+                        if (it.length <= 2) cardExpiryMonth =
+                            if (it.isNotEmpty() && it.toInt() > 12) "12" else it
+                    },
+                    label = { Text("Mes") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    maxLines = 1,
+                )
+                OutlinedTextField(
+                    modifier = modifier.weight(1.0f),
+                    value = cardExpiryYear,
+                    onValueChange = { if (it.length <= 2) cardExpiryYear = it },
+                    label = { Text("Año") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    maxLines = 1,
+                )
+                OutlinedTextField(
+                    modifier = modifier.weight(1.0f),
+                    value = cardCcv,
+                    onValueChange = { if (it.length <= 3) cardCcv = it },
+                    label = { Text("CCV") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    maxLines = 1,
+                )
+            }
+
+            Spacer(
+                modifier = Modifier.weight(1.0f)
+            )
+
+            ScreenBottomButtons(
+                onPrimaryButton = {
+                    loading = true
+                    viewModel.startSale(
+                        cardNumber = cardNumber,
+                        cardHolder = cardHolder,
+                        cardExpiryMonth = cardExpiryMonth,
+                        cardExpiryYear = cardExpiryYear,
+                        cardCcv = cardCcv,
+                        clientCuit = clientCuit,
+                        onSuccessCallback = {
+                            loading = false
+                            coroutineScope.launch(Dispatchers.Main) {
+                                onSale()
+                            }
+                        },
+                        onFailureCallback = {
+                            loading = false
+                            coroutineScope.launch {
+                                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    )
+                },
+                onSecondaryButton = onBack,
+                primaryButtonEnabled = !loading
+            )
+        }
     }
 }

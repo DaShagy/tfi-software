@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -51,7 +52,7 @@ fun SaleLinesDetailScreen(
 
         LazyColumn(
             modifier = Modifier
-                .weight(1.0f)
+                .fillMaxWidth()
                 .padding(vertical = 8.dp)
         ) {
             items(saleLines.value) { line ->
@@ -64,6 +65,8 @@ fun SaleLinesDetailScreen(
                 )
             }
         }
+
+        Spacer(modifier = modifier.weight(1.0f))
 
         Row(
             modifier = Modifier
