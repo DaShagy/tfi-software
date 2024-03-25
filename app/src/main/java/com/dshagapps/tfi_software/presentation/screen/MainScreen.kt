@@ -21,17 +21,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    onStartSale: (Int) -> Unit,
-    onBack: () -> Unit
+    onStartSale: () -> Unit,
+    onBack: () -> Unit,
 ) {
 
     BackHandler (onBack = onBack)
 
-    var branchId by remember { mutableStateOf("") }
+    //var branchId by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -40,19 +39,17 @@ fun MainScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-            OutlinedTextField(
+            /*OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = branchId,
                 onValueChange = { branchId = it },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 maxLines = 1
-            )
+            )*/
 
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    onStartSale(branchId.toIntOrNull() ?: 1)
-                }
+                onClick = onStartSale
             ) {
                 Text(text = "Iniciar venta")
             }

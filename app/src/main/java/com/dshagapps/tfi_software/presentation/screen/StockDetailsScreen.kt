@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun StockDetailsScreen(
     modifier: Modifier = Modifier,
-    branchId: Int = 1,
+    salesmenId: Int = 1,
     onBack: () -> Unit,
     onContinue: () -> Unit,
     viewModel: SaleViewModel
@@ -119,7 +119,7 @@ fun StockDetailsScreen(
 
     LaunchedEffect(Unit) {
         viewModel.getStockByBranch(
-            branchId = branchId,
+            branchId = salesmenId,
             onFailureCallback = {
                 this.launch {
                     Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()

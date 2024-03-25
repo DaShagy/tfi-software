@@ -3,13 +3,13 @@ package com.dshagapps.tfi_software.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dshagapps.tfi_software.domain.entities.Card
-import com.dshagapps.tfi_software.domain.entities.Client
+import com.dshagapps.tfi_software.domain.entities.Receipt
 import com.dshagapps.tfi_software.domain.entities.Sale
-import com.dshagapps.tfi_software.domain.entities.Stock
 import com.dshagapps.tfi_software.domain.enums.PaymentType
 import com.dshagapps.tfi_software.domain.repositories.SaleRepository
 import com.dshagapps.tfi_software.domain.rules.AnonymousClientRules
 import com.dshagapps.tfi_software.presentation.models.ClientUiModel
+import com.dshagapps.tfi_software.presentation.models.ReceiptUiModel
 import com.dshagapps.tfi_software.presentation.models.SaleLineUiModel
 import com.dshagapps.tfi_software.presentation.models.StockUiModel
 import com.dshagapps.tfi_software.presentation.utils.decrementStockQuantity
@@ -17,18 +17,14 @@ import com.dshagapps.tfi_software.presentation.utils.formatWithoutDecimalSeparat
 import com.dshagapps.tfi_software.presentation.utils.getTotal
 import com.dshagapps.tfi_software.presentation.utils.incrementStockQuantity
 import com.dshagapps.tfi_software.presentation.utils.toDomainEntity
+import com.dshagapps.tfi_software.presentation.utils.toPriceString
 import com.dshagapps.tfi_software.presentation.utils.toUiModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import java.math.BigInteger
 
 class SaleViewModel(
     private val repository: SaleRepository
@@ -36,11 +32,27 @@ class SaleViewModel(
 
     val saleLines: MutableStateFlow<List<SaleLineUiModel>> = MutableStateFlow(emptyList())
 
+    val receipt: MutableStateFlow<ReceiptUiModel?> = MutableStateFlow(null)
+
+    fun login(
+        username: String,
+        password: String,
+        onSuccessCallback: (Int) -> Unit,
+        onFailureCallback: (Throwable) -> Unit
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        repository.login(username, password).fold(
+            onSuccess = {
+                onSuccessCallback(it.salesmenId)
+            },
+            onFailure = onFailureCallback
+        )
+    }
+
     fun getStockByBranch(
         branchId: Int,
         onFailureCallback: (Throwable) -> Unit
     ): Flow<List<StockUiModel>> = flow {
-        repository.getStockByBranchId(branchId).fold(
+        repository.getStockBySalesmenId(branchId).fold(
             onSuccess = { stockList ->
                 emit(stockList.map { stock -> stock.toUiModel() })
             },
@@ -67,7 +79,7 @@ class SaleViewModel(
         cardExpiryYear: String,
         cardCcv: String,
         clientCuit: String,
-        onSuccessCallback: (String) -> Unit,
+        onSuccessCallback: () -> Unit,
         onFailureCallback: (Throwable) -> Unit
     ) = viewModelScope.launch(Dispatchers.IO) {
         repository.startSale(
@@ -85,13 +97,16 @@ class SaleViewModel(
             ),
             type = PaymentType.CARD
         ).fold(
-            onSuccess = onSuccessCallback,
+            onSuccess = { newReceipt ->
+                receipt.value = newReceipt.toUiModel()
+                onSuccessCallback()
+            },
             onFailure = onFailureCallback
         )
     }
     fun startSale(
         clientCuit: String,
-        onSuccessCallback: (String) -> Unit,
+        onSuccessCallback: () -> Unit,
         onFailureCallback: (Throwable) -> Unit
     ) = viewModelScope.launch(Dispatchers.IO) {
         repository.startSale(
@@ -103,7 +118,10 @@ class SaleViewModel(
             ),
             type = PaymentType.CASH
         ).fold(
-            onSuccess = onSuccessCallback,
+            onSuccess = { newReceipt ->
+                receipt.value = newReceipt.toUiModel()
+                onSuccessCallback()
+            },
             onFailure = onFailureCallback
         )
     }

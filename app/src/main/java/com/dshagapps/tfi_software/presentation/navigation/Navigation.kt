@@ -1,5 +1,6 @@
 package com.dshagapps.tfi_software.presentation.navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -7,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.dshagapps.tfi_software.presentation.screen.AuthScreen
 import com.dshagapps.tfi_software.presentation.screen.CardPaymentFormScreen
 import com.dshagapps.tfi_software.presentation.screen.ClientDetailScreen
 import com.dshagapps.tfi_software.presentation.screen.MainScreen
@@ -21,24 +23,42 @@ fun Navigation(
     viewModel: SaleViewModel,
     onBack: () -> Unit
 ) {
-    NavHost(navController = navController, startDestination = "mainScreen") {
-        composable("mainScreen") {
-            MainScreen(
-                onStartSale = { branchId ->
-                    navController.navigate("stockDetailsScreen?branchId=$branchId")
+    NavHost(navController = navController, startDestination = "authScreen") {
+        composable("authScreen") {
+            AuthScreen(
+                onLogin = { salesmenId ->
+                    navController.navigate("mainScreen?salesmenId=$salesmenId")
+                    Log.d("SALESMENID", salesmenId.toString())
                 },
                 onBack = {
                     if (!navController.popBackStack()) onBack()
-                }
+                },
+                viewModel = viewModel
             )
         }
 
         composable(
-            route = "stockDetailsScreen?branchId={branchId}",
-            arguments = listOf(navArgument("branchId") { type = NavType.IntType })
+            route = "mainScreen?salesmenId={salesmenId}",
+            arguments = listOf(navArgument("salesmenId") { type = NavType.IntType })
+        ) {
+            MainScreen(
+                onStartSale = {
+                    val salesmenId = it.arguments?.getInt("salesmenId", 0) ?: 0
+                    Log.d("SALESMENID", salesmenId.toString())
+                    navController.navigate("stockDetailsScreen?salesmenId=$salesmenId")
+                },
+                onBack = {
+                    if (!navController.popBackStack()) onBack()
+                },
+            )
+        }
+
+        composable(
+            route = "stockDetailsScreen?salesmenId={salesmenId}",
+            arguments = listOf(navArgument("salesmenId") { type = NavType.IntType })
         ) {
             StockDetailsScreen(
-                branchId = it.arguments?.getInt("branchId") ?: 1,
+                salesmenId = it.arguments?.getInt("salesmenId") ?: 1,
                 onBack = {
                     navController.popBackStack()
                     viewModel.cleanStates()
