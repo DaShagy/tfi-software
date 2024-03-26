@@ -48,6 +48,16 @@ class SaleViewModel(
         )
     }
 
+    fun logout(
+        onSuccessCallback: (String) -> Unit,
+        onFailureCallback: (Throwable) -> Unit
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        repository.logout().fold(
+            onSuccess = onSuccessCallback,
+            onFailure = onFailureCallback
+        )
+    }
+
     fun getStockByBranch(
         branchId: Int,
         onFailureCallback: (Throwable) -> Unit
@@ -173,5 +183,6 @@ class SaleViewModel(
 
     fun cleanStates() {
         saleLines.value = emptyList()
+        receipt.value = null
     }
 }

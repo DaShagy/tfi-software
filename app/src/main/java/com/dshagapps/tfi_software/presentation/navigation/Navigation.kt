@@ -13,7 +13,7 @@ import com.dshagapps.tfi_software.presentation.screen.CardPaymentFormScreen
 import com.dshagapps.tfi_software.presentation.screen.ClientDetailScreen
 import com.dshagapps.tfi_software.presentation.screen.MainScreen
 import com.dshagapps.tfi_software.presentation.screen.SaleLinesDetailScreen
-import com.dshagapps.tfi_software.presentation.screen.SaleResultScreen
+import com.dshagapps.tfi_software.presentation.screen.ReceiptScreen
 import com.dshagapps.tfi_software.presentation.screen.StockDetailsScreen
 import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 
@@ -21,7 +21,8 @@ import com.dshagapps.tfi_software.presentation.viewmodel.SaleViewModel
 fun Navigation(
     navController: NavHostController = rememberNavController(),
     viewModel: SaleViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onClearPreferences: () -> Unit
 ) {
     NavHost(navController = navController, startDestination = "authScreen") {
         composable("authScreen") {
@@ -91,7 +92,7 @@ fun Navigation(
                     navController.navigate("cardPaymentFormScreen?clientName=$clientName&cuit=$cuit")
                 },
                 onSale = {
-                    navController.navigate("saleResultScreen")
+                    navController.navigate("receiptScreen")
                 },
                 viewModel = viewModel
             )
@@ -115,7 +116,7 @@ fun Navigation(
                     navController.popBackStack()
                 },
                 onSale = {
-                    navController.navigate("saleResultScreen")
+                    navController.navigate("receiptScreen")
                 },
                 viewModel = viewModel,
                 clientFullName = it.arguments?.getString("clientName") ?: "",
@@ -123,11 +124,15 @@ fun Navigation(
             )
         }
 
-        composable("saleResultScreen") {
-            SaleResultScreen {
-                navController.popBackStack("mainScreen", false)
-                viewModel.cleanStates()
-            }
+        composable("receiptScreen") {
+            ReceiptScreen(
+                onBack = {
+                    navController.popBackStack("authScreen", false)
+                    viewModel.cleanStates()
+                    onClearPreferences()
+                },
+                viewModel = viewModel
+            )
         }
     }
 }

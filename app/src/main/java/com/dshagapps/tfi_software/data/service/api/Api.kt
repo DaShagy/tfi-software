@@ -19,6 +19,9 @@ interface Api {
     @POST("api/auth/local/login")
     fun login(@Body loginBody: LoginRequestBody): Call<BaseResponse<LoginResponse>>
 
+    @GET("api/auth/logout")
+    fun logout(): Call<BaseResponse<String>>
+
     @GET("/api/stock/branch/{salesmenId}")
     fun getStockBySalesmen(@Path("salesmenId")salesmenId: Int): Call<BaseResponse<List<StockResponse>>>
 

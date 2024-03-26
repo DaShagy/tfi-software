@@ -35,6 +35,18 @@ class SaleRepositoryImpl(
         }
     }
 
+    override suspend fun logout(): Result<String> {
+        api.logout().execute().also { response ->
+            return if (response.isSuccessful) {
+                Result.success(response.body()!!.content)
+            } else {
+                Result.failure(
+                    Exception(deserialize(response.errorBody()).message)
+                )
+            }
+        }
+    }
+
     override suspend fun getStockBySalesmenId(salesmenId: Int): Result<List<Stock>> {
         api.getStockBySalesmen(salesmenId).execute().also { response ->
             return if (response.isSuccessful) {

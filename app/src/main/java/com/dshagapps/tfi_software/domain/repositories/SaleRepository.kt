@@ -9,6 +9,7 @@ import com.dshagapps.tfi_software.domain.enums.PaymentType
 
 interface SaleRepository {
     suspend fun login(user: String, password: String): Result<User>
+    suspend fun logout(): Result<String>
     suspend fun getStockBySalesmenId(branchId: Int): Result<List<Stock>>
     suspend fun getClientByCuit(cuit: String): Result<Client>
     suspend fun startSale(sale: Sale, type: PaymentType): Result<Receipt>

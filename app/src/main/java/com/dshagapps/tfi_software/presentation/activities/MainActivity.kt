@@ -1,12 +1,14 @@
 package com.dshagapps.tfi_software.presentation.activities
 
 import android.os.Bundle
+import android.preference.PreferenceManager
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.dshagapps.tfi_software.data.repositories.SaleRepositoryImpl
+import com.dshagapps.tfi_software.data.service.AddCookiesInterceptor
 import com.dshagapps.tfi_software.data.service.ServiceProvider
 import com.dshagapps.tfi_software.data.service.api.Api
 import com.dshagapps.tfi_software.domain.repositories.SaleRepository
@@ -38,10 +40,16 @@ class MainActivity : BaseActivity() {
                         viewModel = viewModel,
                         onBack = {
                             finish()
-                        }
+                        },
+                        onClearPreferences = { clearPreferences() }
                     )
                 }
             }
         }
+    }
+
+    private fun clearPreferences() {
+        val preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        preferences.edit().remove(AddCookiesInterceptor.PREF_COOKIES).apply()
     }
 }
