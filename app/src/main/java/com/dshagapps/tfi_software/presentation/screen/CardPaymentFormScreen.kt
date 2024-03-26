@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
@@ -22,6 +23,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.dshagapps.tfi_software.presentation.ui.components.Loader
@@ -44,6 +47,7 @@ fun CardPaymentFormScreen(
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     var loading by remember { mutableStateOf(false) }
 
@@ -52,6 +56,30 @@ fun CardPaymentFormScreen(
     var cardExpiryMonth by remember { mutableStateOf("") }
     var cardExpiryYear by remember { mutableStateOf("") }
     var cardCcv by remember { mutableStateOf("") }
+
+    val onDoneLambda: () -> Unit = {
+        loading = true
+        viewModel.startSale(
+            cardNumber = cardNumber,
+            cardHolder = cardHolder,
+            cardExpiryMonth = cardExpiryMonth,
+            cardExpiryYear = cardExpiryYear,
+            cardCcv = cardCcv,
+            clientCuit = clientCuit,
+            onSuccessCallback = {
+                loading = false
+                coroutineScope.launch(Dispatchers.Main) {
+                    onSale()
+                }
+            },
+            onFailureCallback = {
+                loading = false
+                coroutineScope.launch {
+                    Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
+    }
 
     if (loading) {
         Loader()
@@ -117,8 +145,17 @@ fun CardPaymentFormScreen(
                     value = cardCcv,
                     onValueChange = { if (it.length <= 3) cardCcv = it },
                     label = { Text("CCV") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     maxLines = 1,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide()
+                            onDoneLambda()
+                        }
+                    )
                 )
             }
 
@@ -127,29 +164,7 @@ fun CardPaymentFormScreen(
             )
 
             ScreenBottomButtons(
-                onPrimaryButton = {
-                    loading = true
-                    viewModel.startSale(
-                        cardNumber = cardNumber,
-                        cardHolder = cardHolder,
-                        cardExpiryMonth = cardExpiryMonth,
-                        cardExpiryYear = cardExpiryYear,
-                        cardCcv = cardCcv,
-                        clientCuit = clientCuit,
-                        onSuccessCallback = {
-                            loading = false
-                            coroutineScope.launch(Dispatchers.Main) {
-                                onSale()
-                            }
-                        },
-                        onFailureCallback = {
-                            loading = false
-                            coroutineScope.launch {
-                                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    )
-                },
+                onPrimaryButton = onDoneLambda,
                 onSecondaryButton = onBack,
                 primaryButtonEnabled = !loading
             )

@@ -1,6 +1,5 @@
 package com.dshagapps.tfi_software.presentation.navigation
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -26,10 +25,10 @@ fun Navigation(
 ) {
     NavHost(navController = navController, startDestination = "authScreen") {
         composable("authScreen") {
+
             AuthScreen(
-                onLogin = { salesmenId ->
-                    navController.navigate("mainScreen?salesmenId=$salesmenId")
-                    Log.d("SALESMENID", salesmenId.toString())
+                onLogin = {
+                    navController.navigate("mainScreen")
                 },
                 onBack = {
                     if (!navController.popBackStack()) onBack()
@@ -38,28 +37,24 @@ fun Navigation(
             )
         }
 
-        composable(
-            route = "mainScreen?salesmenId={salesmenId}",
-            arguments = listOf(navArgument("salesmenId") { type = NavType.IntType })
-        ) {
+        composable("mainScreen") {
             MainScreen(
-                onStartSale = {
-                    val salesmenId = it.arguments?.getInt("salesmenId", 0) ?: 0
-                    Log.d("SALESMENID", salesmenId.toString())
-                    navController.navigate("stockDetailsScreen?salesmenId=$salesmenId")
-                },
                 onBack = {
-                    if (!navController.popBackStack()) onBack()
+                    onBack()
                 },
+                onStartSale = {
+                    navController.navigate("stockDetailsScreen")
+                },
+                onLogout = {
+                    navController.popBackStack()
+                    onClearPreferences()
+                },
+                viewModel = viewModel
             )
         }
 
-        composable(
-            route = "stockDetailsScreen?salesmenId={salesmenId}",
-            arguments = listOf(navArgument("salesmenId") { type = NavType.IntType })
-        ) {
+        composable("stockDetailsScreen") {
             StockDetailsScreen(
-                salesmenId = it.arguments?.getInt("salesmenId") ?: 1,
                 onBack = {
                     navController.popBackStack()
                     viewModel.cleanStates()
@@ -127,9 +122,8 @@ fun Navigation(
         composable("receiptScreen") {
             ReceiptScreen(
                 onBack = {
-                    navController.popBackStack("authScreen", false)
+                    navController.popBackStack("mainScreen", false)
                     viewModel.cleanStates()
-                    onClearPreferences()
                 },
                 viewModel = viewModel
             )

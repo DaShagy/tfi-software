@@ -1,6 +1,5 @@
 package com.dshagapps.tfi_software.presentation.screen
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
@@ -15,7 +14,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.dshagapps.tfi_software.presentation.ui.components.ScreenBottomButtons
 import com.dshagapps.tfi_software.presentation.utils.toPriceString
@@ -30,7 +28,6 @@ fun ReceiptScreen(
 ) {
     BackHandler(onBack = onBack)
 
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     
     val receipt = viewModel.receipt.collectAsState().value
@@ -67,20 +64,9 @@ fun ReceiptScreen(
 
         ScreenBottomButtons(
             onPrimaryButton = {
-                viewModel.logout(
-                    onSuccessCallback = {
-                        coroutineScope.launch {
-                            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-                            onBack()
-                        }
-                    },
-                    onFailureCallback = {
-                        coroutineScope.launch {
-                            Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
-                            onBack()
-                        }
-                    }
-                )
+                coroutineScope.launch {
+                    onBack()
+                }
             }
         )
     }

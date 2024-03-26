@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,9 +28,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.dshagapps.tfi_software.presentation.models.StockUiModel
@@ -41,7 +45,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun StockDetailsScreen(
     modifier: Modifier = Modifier,
-    salesmenId: Int = 1,
     onBack: () -> Unit,
     onContinue: () -> Unit,
     viewModel: SaleViewModel
@@ -49,6 +52,7 @@ fun StockDetailsScreen(
     BackHandler(onBack = onBack)
 
     val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     val saleLines = viewModel.saleLines.collectAsState()
 
@@ -85,7 +89,13 @@ fun StockDetailsScreen(
             value = search,
             onValueChange = { search = it },
             maxLines = 1,
-            label = { Text("Buscar") }
+            label = { Text("Buscar") },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    keyboardController?.hide()
+                }
+            ),
         )
 
         LazyColumn(
@@ -118,8 +128,7 @@ fun StockDetailsScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.getStockByBranch(
-            branchId = salesmenId,
+        viewModel.getStock(
             onFailureCallback = {
                 this.launch {
                     Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()

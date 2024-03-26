@@ -3,7 +3,6 @@ package com.dshagapps.tfi_software.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dshagapps.tfi_software.domain.entities.Card
-import com.dshagapps.tfi_software.domain.entities.Receipt
 import com.dshagapps.tfi_software.domain.entities.Sale
 import com.dshagapps.tfi_software.domain.enums.PaymentType
 import com.dshagapps.tfi_software.domain.repositories.SaleRepository
@@ -17,7 +16,6 @@ import com.dshagapps.tfi_software.presentation.utils.formatWithoutDecimalSeparat
 import com.dshagapps.tfi_software.presentation.utils.getTotal
 import com.dshagapps.tfi_software.presentation.utils.incrementStockQuantity
 import com.dshagapps.tfi_software.presentation.utils.toDomainEntity
-import com.dshagapps.tfi_software.presentation.utils.toPriceString
 import com.dshagapps.tfi_software.presentation.utils.toUiModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -30,6 +28,8 @@ class SaleViewModel(
     private val repository: SaleRepository
 ) : ViewModel() {
 
+    private var salesmenId: Int? = null
+
     val saleLines: MutableStateFlow<List<SaleLineUiModel>> = MutableStateFlow(emptyList())
 
     val receipt: MutableStateFlow<ReceiptUiModel?> = MutableStateFlow(null)
@@ -37,12 +37,13 @@ class SaleViewModel(
     fun login(
         username: String,
         password: String,
-        onSuccessCallback: (Int) -> Unit,
+        onSuccessCallback: () -> Unit,
         onFailureCallback: (Throwable) -> Unit
     ) = viewModelScope.launch(Dispatchers.IO) {
         repository.login(username, password).fold(
             onSuccess = {
-                onSuccessCallback(it.salesmenId)
+                salesmenId = it.salesmenId
+                onSuccessCallback()
             },
             onFailure = onFailureCallback
         )
@@ -58,16 +59,17 @@ class SaleViewModel(
         )
     }
 
-    fun getStockByBranch(
-        branchId: Int,
+    fun getStock(
         onFailureCallback: (Throwable) -> Unit
     ): Flow<List<StockUiModel>> = flow {
-        repository.getStockBySalesmenId(branchId).fold(
-            onSuccess = { stockList ->
-                emit(stockList.map { stock -> stock.toUiModel() })
-            },
-            onFailure = onFailureCallback
-        )
+        salesmenId?.let {
+            repository.getStockBySalesmenId(it).fold(
+                onSuccess = { stockList ->
+                    emit(stockList.map { stock -> stock.toUiModel() })
+                },
+                onFailure = onFailureCallback
+            )
+        } ?: onFailureCallback(Exception("Error obteniendo id del vendedor"))
     }.flowOn(Dispatchers.IO)
 
     fun getClientByCuit(
