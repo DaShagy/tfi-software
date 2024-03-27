@@ -10,8 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.dshagapps.tfi_software.data.repositories.SaleRepositoryImpl
-import com.dshagapps.tfi_software.data.service.AddCookiesInterceptor
 import com.dshagapps.tfi_software.data.service.ServiceProvider
+import com.dshagapps.tfi_software.data.service.ServiceProvider.Companion.PREF_COOKIES
 import com.dshagapps.tfi_software.data.service.api.Api
 import com.dshagapps.tfi_software.domain.repositories.SaleRepository
 import com.dshagapps.tfi_software.presentation.navigation.Navigation
@@ -66,6 +66,6 @@ class MainActivity : BaseActivity() {
 
     private fun clearPreferences() {
         val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-        preferences.edit().remove(AddCookiesInterceptor.PREF_COOKIES).apply()
+        preferences.edit().remove(PREF_COOKIES).apply()
     }
 }
