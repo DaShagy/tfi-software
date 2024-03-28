@@ -67,7 +67,6 @@ fun CardPaymentFormScreen(
             cardCcv = cardCcv,
             clientCuit = clientCuit,
             onSuccessCallback = {
-                loading = false
                 coroutineScope.launch(Dispatchers.Main) {
                     onSale()
                 }

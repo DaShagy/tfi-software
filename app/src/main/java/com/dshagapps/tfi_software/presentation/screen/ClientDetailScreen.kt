@@ -179,7 +179,6 @@ fun ClientDetailScreen(
                         viewModel.startSale(
                             clientCuit = client.cuit,
                             onSuccessCallback = {
-                                loading = false
                                 coroutineScope.launch(Dispatchers.Main) {
                                     onSale()
                                 }
